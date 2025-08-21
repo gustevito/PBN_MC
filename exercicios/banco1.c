@@ -1,5 +1,5 @@
 #include <stdio.h>
-
+// * so usar dentro das funções!!!!!!!!!!!!
 void troco(int r, int *n100, int *n50, int *n10, int *n5, int *n1)
 {
     *n100 = r / 100;
