@@ -6,7 +6,7 @@ int main(int argc, char const *argv[])
 {
     int data[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     incArray(data);
-    printf("Array after incrementing each element:\n");
+    printf("Array após incrementar cada elemento:\n");
     for (int i = 0; i < 10; i++) {
         printf("%d ", data[i]);
     }
