@@ -44,7 +44,8 @@ cpBody *targetBody;
 cpBody *playerBody;
 
 #ifdef _WIN32
-#define TIMESTEP 240
+// Aparentemente não é mais necessário que seja 240
+#define TIMESTEP 60
 #else
 #define TIMESTEP 60
 #endif

@@ -108,6 +108,7 @@ void init(int argc, char **argv)
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
+    glutSpecialFunc(arrow_keys);
     glutMouseFunc(mouse);
     glutTimerFunc(1, timer, 0);
 
@@ -334,6 +335,40 @@ void keyboard(unsigned char key, int x, int y)
         glutPostRedisplay();
     }
 }
+
+// Callback de teclado (teclas especiais)
+void arrow_keys(int key, int x, int y)
+{
+    cpVect pos, grav;
+    int dx = 0;
+    int dy = 0;
+    switch (key)
+    {
+        case GLUT_KEY_DOWN:
+            dx = 0;
+            dy = PLAYER_SPEED;
+            break;
+        case GLUT_KEY_UP:
+            dx = 0;
+            dy = -PLAYER_SPEED;
+            break;
+        case GLUT_KEY_LEFT:
+            dx = -PLAYER_SPEED;
+            dy = 0;
+            break;
+        case GLUT_KEY_RIGHT:
+            dx = PLAYER_SPEED;
+            dy = 0;
+            break;
+    }
+    if (dx != 0 || dy != 0)
+    {
+        pos = cpBodyGetPosition(playerBody);
+        cpBodyApplyImpulseAtWorldPoint(playerBody, cpv(dx, dy), cpv(pos.x, pos.y));
+        glutPostRedisplay();
+    }
+}
+
 
 // Callback de mouse (se necessário)
 void mouse(int button, int state, int x, int y)
