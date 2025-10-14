@@ -20,11 +20,9 @@
 extern cpSpace *space;
 extern cpFloat timeStep;
 
-// Score do jogo - definido em main.c
 extern int score;
-extern int gameOver; // 1 se o jogo tiver acabado
+extern int gameOver; 
 
-// Tex id para a imagem de fundo
 GLuint backgroundTex;
 
 // Gravidade: usada aqui apenas para testar o liga/desliga

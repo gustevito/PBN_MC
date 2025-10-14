@@ -29,7 +29,6 @@ typedef enum
 // (tipo do ponteiro de função)
 typedef void (*bodyMotionFunc)(cpBody *body, void *data);
 
-// Você pode adicionr mais campos se necessário
 typedef struct
 {
     GLuint tex;
@@ -40,8 +39,7 @@ typedef struct
     bodyMotionFunc func;
 } UserData;
 
-// Funções da interface gráfica e OpenGL
 void init(int argc, char **argv);
 GLuint loadImage(char *img);
 
-#endif // MYOPENGL_H
+#endif

@@ -43,6 +43,9 @@ cpBody *targetBody;
 // Um jogador
 cpBody *playerBody;
 
+// obstáculo:
+cpBody *bloco
+
 #ifdef _WIN32
 // Aparentemente não é mais necessário que seja 240
 #define TIMESTEP 60
@@ -68,7 +71,7 @@ cpBool collisionHandler(cpArbiter *arb, cpSpace *space, void *data)
 // OpenGL para a leitura das imagens
 void initCM()
 {
-    gravity = cpv(0, 1000);
+    gravity = cpv(0, 300);
 
     // Cria o universo
     space = cpSpaceNew();
@@ -93,16 +96,18 @@ void initCM()
     //   - ponteiro para a função de movimentação (chamada a cada passo, pode ser NULL)
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
-    //targetBody = newRect(cpv(512, 350), 30, 30, 1, "images/ship2.png", moveTarget, 0.2, 1);
-    targetBody = newCircle(TARGET, cpv(512, 350), 30, 10, "images/ship2.png", moveTarget, 0.2, 0.5);
 
-    // ... e um jogador de exemplo
-    // playerBody = newCircle(cpv(50, 350), 30, 5, "images/ship1.png", movePlayer, 0.2, 0.5);
+    // targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/ship2.png", NULL, 0.2, 0.2);
+    targetBody = newCircle(TARGET, cpv(512, 350), 30, 10, "images/ship2.png", moveTarget, 0.2, 0.5);
+    targetBody = newCircle(TARGET, cpv(100, 100), 50, 30, "images/ship10.png", moveTarget, 0.2, 0.5);
+    
     playerBody = newCircle(PLAYER, cpv(50, 350), 30, 10, "images/ship1.png", NULL, 0.2, 0.5);
+
+    bloco = newRect(TARGET, cpv(700, 0) 50, 20, "images/tijolo.png", NULL, 0.2, 0.5);
 
 
     // Se você quiser criar um corpo ESTÁTICO, isto é, que não irá se movimentar, faça:
-    // cpBodySetType(targetBody, CP_BODY_TYPE_STATIC);
+    cpBodySetType(targetBody, CP_BODY_TYPE_STATIC);
 
     // Tratamento de colisões: callback
     cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, PLAYER, WALL); 
@@ -114,7 +119,7 @@ void movePlayer(cpBody *body, void *data)
 {
     // Veja como obter e limitar a velocidade do corpo:
     cpVect vel = cpBodyGetVelocity(body);
-    // printf("vel: %f %f", vel.x,vel.y);
+    // printf("\nvel: %f %f", vel.x,vel.y);
 
     // Limita o vetor em 300 unidades
     vel = cpvclamp(vel, 300);
@@ -217,26 +222,13 @@ cpShape *newLine(cpCollisionType objType, cpVect inicio, cpVect fim, cpFloat fri
 // Cria e adiciona um novo corpo dinâmico, com formato circular
 cpBody *newCircle(cpCollisionType objType, cpVect pos, cpFloat radius, cpFloat mass, char *img, bodyMotionFunc func, cpFloat fric, cpFloat elast)
 {
-    // Primeiro criamos um cpBody para armazenar as propriedades fisicas do objeto
-    // Estas incluem: massa, posicao, velocidade, angulo, etc do objeto
-    // A seguir, adicionamos formas de colisao ao cpBody para informar o seu formato e tamanho
-
-    // O momento de inercia e' como a massa, mas para rotacao
-    // Use as funcoes cpMomentFor*() para calcular a aproximacao dele
     cpFloat moment = cpMomentForCircle(mass, 0, radius, cpvzero);
-
-    // As funcoes cpSpaceAdd*() retornam o que voce esta' adicionando
-    // E' conveniente criar e adicionar um objeto na mesma linha
     cpBody *newBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
 
-    // Por fim, ajustamos a posicao inicial do objeto
     cpBodySetPosition(newBody, pos);
 
-    // Agora criamos a forma de colisao do objeto
-    // Voce pode criar multiplas formas de colisao, que apontam ao mesmo objeto (mas nao e' necessario para o trabalho)
-    // Todas serao conectadas a ele, e se moverao juntamente com ele
     cpShape *newShape = cpSpaceAddShape(space, cpCircleShapeNew(newBody, radius, cpvzero));
-    cpShapeSetCollisionType(newShape, objType); // Define o tipo de colisão (pode ser usado em colisões específicas)
+    cpShapeSetCollisionType(newShape, objType);
     cpShapeSetFriction(newShape, fric);
     cpShapeSetElasticity(newShape, elast);
 
@@ -251,31 +243,17 @@ cpBody *newCircle(cpCollisionType objType, cpVect pos, cpFloat radius, cpFloat m
     return newBody;
 }
 
-// Cria e adiciona um novo corpo dinâmico, com formato retangular
 cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat height, cpFloat mass, char *img, bodyMotionFunc func, cpFloat fric, cpFloat elast)
 {
     cpFloat radius = width > height ? width : height;
-    // Primeiro criamos um cpBody para armazenar as propriedades fisicas do objeto
-    // Estas incluem: massa, posicao, velocidade, angulo, etc do objeto
-    // A seguir, adicionamos formas de colisao ao cpBody para informar o seu formato e tamanho
-
-    // O momento de inercia e' como a massa, mas para rotacao
-    // Use as funcoes cpMomentFor*() para calcular a aproximacao dele
     cpFloat moment = cpMomentForBox(mass, width, height);
 
-    // As funcoes cpSpaceAdd*() retornam o que voce esta' adicionando
-    // E' conveniente criar e adicionar um objeto na mesma linha
     cpBody *newBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
 
-    // Por fim, ajustamos a posicao inicial do objeto
     cpBodySetPosition(newBody, pos);
-
-    // Agora criamos a forma de colisao do objeto
-    // Voce pode criar multiplas formas de colisao, que apontam ao mesmo objeto (mas nao e' necessario para o trabalho)
-    // Todas serao conectadas a ele, e se moverao juntamente com ele
     radius /= 2;
     cpShape *newShape = cpSpaceAddShape(space, cpBoxShapeNew(newBody, width, height, radius));
-    cpShapeSetCollisionType(newShape, objType); // Define o tipo de colisão (pode ser usado em colisões específicas)
+    cpShapeSetCollisionType(newShape, objType);
     cpShapeSetFriction(newShape, fric);
     cpShapeSetElasticity(newShape, elast);
 
