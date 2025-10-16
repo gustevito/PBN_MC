@@ -43,8 +43,6 @@ cpBody *targetBody;
 // Um jogador
 cpBody *playerBody;
 
-// obstáculo:
-cpBody *bloco
 
 #ifdef _WIN32
 // Aparentemente não é mais necessário que seja 240
@@ -77,7 +75,7 @@ void initCM()
     space = cpSpaceNew();
 
     // Seta o fator de damping, isto é, de atrito do ar (10% da velocidade é perdida a cada segundo)
-    cpSpaceSetDamping(space, 0.9);
+    cpSpaceSetDamping(space, 0.1);
 
     cpSpaceSetGravity(space, cpv(0,0));
 
@@ -103,7 +101,6 @@ void initCM()
     
     playerBody = newCircle(PLAYER, cpv(50, 350), 30, 10, "images/ship1.png", NULL, 0.2, 0.5);
 
-    bloco = newRect(TARGET, cpv(700, 0) 50, 20, "images/tijolo.png", NULL, 0.2, 0.5);
 
 
     // Se você quiser criar um corpo ESTÁTICO, isto é, que não irá se movimentar, faça:
