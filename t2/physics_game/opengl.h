@@ -17,7 +17,10 @@
 #include <chipmunk.h>
 
 #define LARGURA_JAN 712
-#define ALTURA_JAN 824
+#define ALTURA_JAN 840
+
+#define XPOS_INICIO 400
+#define YPOS_INICIO 700
 
 typedef enum
 {

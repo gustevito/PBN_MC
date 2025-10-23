@@ -13,9 +13,17 @@ void moveTarget(cpBody *body, void *data);
 void initCM();
 void freeCM();
 void restartCM();
+
+void initMenuAssets();
+
 cpShape *newLine(cpCollisionType objType, cpVect inicio, cpVect fim, cpFloat fric, cpFloat elast);
 cpBody *newCircle(cpCollisionType objType, cpVect pos, cpFloat radius, cpFloat mass, char *img, bodyMotionFunc func, cpFloat fric, cpFloat elast);
 cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat height, cpFloat mass, char *img, bodyMotionFunc func, cpFloat fric, cpFloat elast);
+
+// Estado atual do jogo
+#define STATE_MENU 0
+#define STATE_GAME 1
+int gameState = STATE_MENU;
 
 // Score do jogo
 int score = 0;
@@ -75,7 +83,7 @@ void initCM()
     space = cpSpaceNew();
 
     // Seta o fator de damping, isto é, de atrito do ar (10% da velocidade é perdida a cada segundo)
-    cpSpaceSetDamping(space, 0.1);
+    cpSpaceSetDamping(space, 0.5);
 
     cpSpaceSetGravity(space, cpv(0,0));
 
@@ -97,9 +105,8 @@ void initCM()
 
     // targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/ship2.png", NULL, 0.2, 0.2);
     targetBody = newCircle(TARGET, cpv(512, 350), 30, 10, "images/ship2.png", moveTarget, 0.2, 0.5);
-    targetBody = newCircle(TARGET, cpv(100, 100), 50, 30, "images/ship10.png", moveTarget, 0.2, 0.5);
     
-    playerBody = newCircle(PLAYER, cpv(50, 350), 30, 10, "images/ship1.png", NULL, 0.2, 0.5);
+    playerBody = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 30, 50, 10, "images/ship1.png", NULL, 0.2, 0.5);
 
 
 
@@ -199,6 +206,8 @@ int main(int argc, char **argv)
 {
     // Inicialização da janela gráfica
     init(argc, argv);
+
+    initMenuAssets();
 
     // Não retorna... a partir daqui, interação via teclado e mouse apenas, na janela gráfica
     glutMainLoop();

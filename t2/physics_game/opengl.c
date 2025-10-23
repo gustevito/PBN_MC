@@ -20,6 +20,10 @@
 extern cpSpace *space;
 extern cpFloat timeStep;
 
+extern int gameState;
+void drawMenu();
+void menuKeyboard(unsigned char key, int x, int y);
+
 extern int score;
 extern int gameOver; 
 
@@ -70,7 +74,7 @@ void DrawDot(cpFloat size, cpVect pos, cpSpaceDebugColor color, cpDataPointer da
 
 GLuint loadImage(char *img)
 {
-    GLuint t = SOIL_load_OGL_texture(img, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_MULTIPLY_ALPHA);
+    GLuint t = SOIL_load_OGL_texture(img, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_TEXTURE_REPEATS | SOIL_FLAG_MULTIPLY_ALPHA);
     if (!t)
     {
         printf("SOIL loading error: '%s'\n", SOIL_last_result());
@@ -107,7 +111,7 @@ void init(int argc, char **argv)
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(arrow_keys);
-    glutMouseFunc(mouse);
+    glutKeyboardFunc(menuKeyboard);
     glutTimerFunc(1, timer, 0);
 
     glEnable(GL_BLEND);
@@ -229,24 +233,22 @@ void drawScore()
 // Desenha a tela
 void display()
 {
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f); // Fundo de tela preto
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glMatrixMode(GL_MODELVIEW);
+    if (gameState == 0) {
+        drawMenu();
+        return;
+    }
 
+    // se gameState == 1, desenha o jogo normalmente
+    glMatrixMode(GL_MODELVIEW);
     drawBackground();
     drawScore();
-
-    // Desenha e movimenta todos os corpos: jogador e alvo
     cpSpaceEachBody(space, eachBodyFunc, NULL);
-
-    // Debugdrag: desenha as formas de colisão para debug
-    // Comente caso não queria mais ver
     cpSpaceDebugDraw(space, &drawOptions);
-
-    // Exibe a tela
     glutSwapBuffers();
 }
+
 
 // Callback de redimensionamento da janela
 void reshape(int w, int h)
@@ -369,17 +371,17 @@ void arrow_keys(int key, int x, int y)
 
 
 // Callback de mouse (se necessário)
-void mouse(int button, int state, int x, int y)
-{
-    // printf("%d %d %d\n",button,x,y);
-    // if(button == 3) {
-    //     //
-    // }
-    // else if(button == 4) {
-    //     //
-    // }
-    glutPostRedisplay();
-}
+// void mouse(int button, int state, int x, int y)
+// {
+//     if (gameState == 0) {
+//         mouseMenu(button, state, x, y);
+//         return;
+//     }
+
+//     // resto do mouse do jogo, se precisar
+//     glutPostRedisplay();
+// }
+
 
 //
 // Funções para o debug draw da Chipmunk
