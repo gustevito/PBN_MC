@@ -81,7 +81,7 @@ GLuint loadImage(char *img)
 
 void loadImages()
 {
-    backgroundTex = loadImage("images/background.png");
+    backgroundTex = loadImage("images/background.jpg");
     printf("Background tex id: %d\n", backgroundTex);
 }
 

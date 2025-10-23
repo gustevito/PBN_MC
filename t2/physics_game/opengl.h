@@ -16,8 +16,8 @@
 #include <stdlib.h>
 #include <chipmunk.h>
 
-#define LARGURA_JAN 1024
-#define ALTURA_JAN 712
+#define LARGURA_JAN 712
+#define ALTURA_JAN 824
 
 typedef enum
 {
