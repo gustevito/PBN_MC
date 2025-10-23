@@ -15,8 +15,7 @@ GLuint loadTexture(const char *filename) {
         filename,
         SOIL_LOAD_AUTO,
         SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_TEXTURE_REPEATS | SOIL_FLAG_NTSC_SAFE_RGB
-
+        SOIL_FLAG_DDS_LOAD_DIRECT
     );
     if (!texID)
         printf("Erro carregando textura: %s\n", SOIL_last_result());
@@ -51,7 +50,7 @@ void drawMenu() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Fundo simples
-    glColor3f(0.1f, 0.1f, 0.15f);
+    glColor3f(0.8f, 0.6f, 0.01f);
     glBegin(GL_QUADS);
         glVertex2f(0, 0);
         glVertex2f(LARGURA_JAN, 0);

@@ -106,7 +106,7 @@ void initCM()
     // targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/ship2.png", NULL, 0.2, 0.2);
     targetBody = newCircle(TARGET, cpv(512, 350), 30, 10, "images/ship2.png", moveTarget, 0.2, 0.5);
     
-    playerBody = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 30, 50, 10, "images/ship1.png", NULL, 0.2, 0.5);
+    playerBody = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 50, 80, 10, "images/carrinhotop.png", NULL, 0.2, 0.5);
 
 
 
