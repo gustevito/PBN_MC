@@ -20,7 +20,7 @@
 #define ALTURA_JAN 840
 
 #define XPOS_INICIO 400
-#define YPOS_INICIO 700
+#define YPOS_INICIO 220
 
 typedef enum
 {
