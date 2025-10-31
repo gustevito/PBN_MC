@@ -15,7 +15,11 @@
 #define M_PI 3.14159265358979323846
 #endif // M_PI
 
-#define PLAYER_SPEED 300
+#define PLAYER_SPEED 20
+
+// movement fix ##
+extern int keys[256];
+extern int special_keys[256];
 
 extern cpSpace *space;
 extern cpFloat timeStep;
@@ -51,15 +55,22 @@ void drawBackground();
 // Funções da interface gráfica e OpenGL
 void display();
 void keyboard(unsigned char key, int x, int y);
-void mouse(int button, int state, int x, int y);
+void keyboardUp(unsigned char key, int x, int y); // movement fix ##
 void arrow_keys(int key, int x, int y);
+void arrow_keys_up(int key, int x, int y);  // movement fix ##
 void reshape(int w, int h);
 void init(int argc, char **argv);
 void timer(int val);
+void updateMovement(); // movement fix ##
+
+
+
 
 // Funções para a Chipmunk
 void eachBodyFunc(cpBody *body, void *data);
 void drawBody(cpVect pos, cpFloat angle, UserData *ud);
+
+
 
 #ifndef __FREEGLUT_H__
 void glutBitmapString(void *font, char *string);
@@ -104,7 +115,7 @@ cpSpaceDebugColor ColorForShape(cpShape *shape, cpDataPointer data)
 
 void init(int argc, char **argv)
 {
-    glutInit(&argc, argv);
+glutInit(&argc, argv);
 
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowPosition(10, 10);
@@ -119,7 +130,11 @@ void init(int argc, char **argv)
     glutSpecialFunc(arrow_keys);
     glutKeyboardFunc(menuKeyboard);
     glutTimerFunc(1, timer, 0);
-
+    
+    // movement fix ##
+    glutKeyboardUpFunc(keyboardUp);
+    glutSpecialUpFunc(arrow_keys_up);
+    
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -138,6 +153,7 @@ void init(int argc, char **argv)
 
 void timer(int val)
 {
+    updateMovement(); // Processa movimento contínuo
     cpSpaceStep(space, timeStep);
     glutTimerFunc(1, timer, 0);
     glutPostRedisplay();
@@ -288,44 +304,22 @@ void reshape(int w, int h)
 // Callback de teclado
 void keyboard(unsigned char key, int x, int y)
 {
-    cpVect pos, grav;
-    int dx = 0;
-    int dy = 0;
+    keys[key] = 1; // Marca tecla como pressionada
+    
     switch (key)
     {
     case 27:
-        // ESC libera memória e finaliza a aplicação
         freeCM();
         exit(1);
         break;
     case 'f':
-        // F gera um game over (teste)
         gameOver = 1;
         break;
     case 'r':
-        // R faz restart na simulação (chama função restartCM)
         restartCM();
         break;
-        // Teste: controla jogador com WASD
-    case 's':
-        dx = 0;
-        dy = PLAYER_SPEED;
-        break;
-    case 'w':
-        dx = 0;
-        dy = -PLAYER_SPEED;
-        break;
-    case 'a':
-        dx = -PLAYER_SPEED;
-        dy = 0;
-        break;
-    case 'd':
-        dx = PLAYER_SPEED;
-        dy = 0;
-        break;
     case 'g':
-        // Teste: g liga e desliga a gravidade
-        grav = cpSpaceGetGravity(space);
+        cpVect grav = cpSpaceGetGravity(space);
         if (grav.y == 0)
             grav.y = gravity.y;
         else
@@ -334,60 +328,50 @@ void keyboard(unsigned char key, int x, int y)
         cpSpaceSetGravity(space, grav);
         break;
     }
-    if (dx != 0 || dy != 0)
-    {
-        pos = cpBodyGetPosition(playerBody);
-        cpBodyApplyImpulseAtWorldPoint(playerBody, cpv(dx, dy), cpv(pos.x, pos.y));
-        glutPostRedisplay();
-    }
 }
 
 // Callback de teclado (teclas especiais)
 void arrow_keys(int key, int x, int y)
 {
-    cpVect pos, grav;
-    int dx = 0;
-    int dy = 0;
-    switch (key)
-    {
-        case GLUT_KEY_DOWN:
-            dx = 0;
-            dy = PLAYER_SPEED;
-            break;
-        case GLUT_KEY_UP:
-            dx = 0;
-            dy = -PLAYER_SPEED;
-            break;
-        case GLUT_KEY_LEFT:
-            dx = -PLAYER_SPEED;
-            dy = 0;
-            break;
-        case GLUT_KEY_RIGHT:
-            dx = PLAYER_SPEED;
-            dy = 0;
-            break;
-    }
-    if (dx != 0 || dy != 0)
-    {
-        pos = cpBodyGetPosition(playerBody);
-        cpBodyApplyImpulseAtWorldPoint(playerBody, cpv(dx, dy), cpv(pos.x, pos.y));
-        glutPostRedisplay();
-    }
+    special_keys[key] = 1; // Marca tecla especial como pressionada
 }
 
+// Callback para quando uma tecla especial é solta
+void arrow_keys_up(int key, int x, int y)
+{
+    special_keys[key] = 0; // Marca tecla especial como NÃO pressionada
+}
 
-// Callback de mouse (se necessário)
-// void mouse(int button, int state, int x, int y)
-// {
-//     if (gameState == 0) {
-//         mouseMenu(button, state, x, y);
-//         return;
-//     }
+void keyboardUp(unsigned char key, int x, int y)
+{
+    keys[key] = 0;
+}
 
-//     // resto do mouse do jogo, se precisar
-//     glutPostRedisplay();
-// }
-
+// processa movimento continuo
+void updateMovement()
+{
+    if (gameOver || !playerBody) return;
+    
+    int dx = 0, dy = 0;
+    
+    // Verifica teclas normais
+    if (keys['w'] || keys['W']) dy -= PLAYER_SPEED;
+    if (keys['s'] || keys['S']) dy += PLAYER_SPEED;
+    if (keys['a'] || keys['A']) dx -= PLAYER_SPEED;
+    if (keys['d'] || keys['D']) dx += PLAYER_SPEED;
+    
+    // Verifica teclas especiais (setas)
+    if (special_keys[GLUT_KEY_UP]) dy -= PLAYER_SPEED;
+    if (special_keys[GLUT_KEY_DOWN]) dy += PLAYER_SPEED;
+    if (special_keys[GLUT_KEY_LEFT]) dx -= PLAYER_SPEED;
+    if (special_keys[GLUT_KEY_RIGHT]) dx += PLAYER_SPEED;
+    
+    if (dx != 0 || dy != 0)
+    {
+        cpVect pos = cpBodyGetPosition(playerBody);
+        cpBodyApplyImpulseAtWorldPoint(playerBody, cpv(dx, dy), pos);
+    }
+}
 
 //
 // Funções para o debug draw da Chipmunk

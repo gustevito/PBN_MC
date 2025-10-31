@@ -1,6 +1,7 @@
 #include <math.h>
 #include <chipmunk.h>
 #include <SOIL.h>
+#include <string.h>
 
 // Rotinas para acesso da OpenGL
 #include "opengl.h"
@@ -30,6 +31,10 @@ int score = 0;
 
 // Flag de controle: 1 se o jogo tiver acabado
 int gameOver = 0;
+
+// movement
+int keys[256] = {0};
+int special_keys[256] = {0};
 
 // cpVect e' um vetor 2D e cpv() e' uma forma rapida de inicializar ele.
 cpVect gravity;
@@ -73,15 +78,16 @@ cpBool collisionHandler(cpArbiter *arb, cpSpace *space, void *data)
     return cpTrue;
 }
 
-// Inicializa o ambiente: é chamada por init() em opengl.c, pois necessita do contexto
-// OpenGL para a leitura das imagens
+// Inicializa o ambiente: é chamada por init() em opengl.c, pois necessita do contexto OpenGL para a leitura das imagens
 void initCM()
 {
-    gravity = cpv(0, 300);
+    // movement fix ## reseta estado das teclas de movimentação
+    memset(keys, 0, sizeof(keys));
+    memset(special_keys, 0, sizeof(special_keys));
 
+    gravity = cpv(0, 300);
     // Cria o universo
     space = cpSpaceNew();
-
     // Seta o fator de damping, isto é, de atrito do ar (10% da velocidade é perdida a cada segundo)
     cpSpaceSetDamping(space, 0.5);
 
@@ -188,6 +194,9 @@ void freeCM()
 // Função chamada para reiniciar a simulação
 void restartCM()
 {
+    // movement fix ## reset de teclas
+    // memset(keys, 0, sizeof(keys));
+    // memset(special_keys, 0, sizeof(special_keys));
     // Escreva o código para reposicionar os personagens, ressetar o score, etc.
 
     // Não esqueça de ressetar a variável gameOver!
