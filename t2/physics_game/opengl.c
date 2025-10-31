@@ -74,7 +74,13 @@ void DrawDot(cpFloat size, cpVect pos, cpSpaceDebugColor color, cpDataPointer da
 
 GLuint loadImage(char *img)
 {
-    GLuint t = SOIL_load_OGL_texture(img, SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_TEXTURE_REPEATS | SOIL_FLAG_MULTIPLY_ALPHA);
+    GLuint t = SOIL_load_OGL_texture(
+        img,
+        SOIL_LOAD_AUTO,
+        SOIL_CREATE_NEW_ID,
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_TEXTURE_REPEATS | SOIL_FLAG_MULTIPLY_ALPHA
+    );
+
     if (!t)
     {
         printf("SOIL loading error: '%s'\n", SOIL_last_result());

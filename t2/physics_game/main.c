@@ -14,7 +14,7 @@ void initCM();
 void freeCM();
 void restartCM();
 
-void initMenuAssets();
+void loadMenuComponents();
 
 cpShape *newLine(cpCollisionType objType, cpVect inicio, cpVect fim, cpFloat fric, cpFloat elast);
 cpBody *newCircle(cpCollisionType objType, cpVect pos, cpFloat radius, cpFloat mass, char *img, bodyMotionFunc func, cpFloat fric, cpFloat elast);
@@ -207,7 +207,7 @@ int main(int argc, char **argv)
     // Inicialização da janela gráfica
     init(argc, argv);
 
-    initMenuAssets();
+    loadMenuComponents();
 
     // Não retorna... a partir daqui, interação via teclado e mouse apenas, na janela gráfica
     glutMainLoop();

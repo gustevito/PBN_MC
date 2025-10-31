@@ -9,40 +9,74 @@ extern void restartCM(void);
 GLuint titleTexture;
 GLuint pressSpaceTexture;
 
-// Função para carregar textura com SOIL
-GLuint loadTexture(const char *filename) {
-    GLuint texID = SOIL_load_OGL_texture(
-        filename,
+GLuint loadComps(const char *imgFile);
+void loadMenuComponents();
+
+GLuint loadComps(const char *imgFile)
+{
+    GLuint t = SOIL_load_OGL_texture(
+        imgFile,
         SOIL_LOAD_AUTO,
         SOIL_CREATE_NEW_ID,
         SOIL_FLAG_DDS_LOAD_DIRECT
     );
-    if (!texID)
-        printf("Erro carregando textura: %s\n", SOIL_last_result());
-    return texID;
+    if (!t)
+    {
+        printf("SOIL loading error: '%s'\n", SOIL_last_result());
+        exit(1);
+    }
+    return t;
 }
 
-// Inicializa as texturas do menu
-void initMenuAssets() {
-    titleTexture = loadTexture("images/titlemenu.png");
-    pressSpaceTexture = loadTexture("images/buttonmenu.png");
+void loadMenuComponents()
+{
+    titleTexture = loadComps("images/titlemenu.png");
+    pressSpaceTexture = loadComps("images/buttonmenu.png");
+    printf("Title Texture ID: %d\n", titleTexture);
+    printf("Button Texture ID: %d\n", pressSpaceTexture);
 }
 
-// Desenha textura em um retângulo
+// Função para carregar textura com SOIL
+// GLuint loadComps(const char *img) {
+//     GLuint texID = SOIL_load_OGL_texture(
+//         img,
+//         SOIL_LOAD_AUTO,
+//         SOIL_CREATE_NEW_ID,
+//         SOIL_FLAG_DDS_LOAD_DIRECT
+//     );
+//     if (!texID)
+//         printf("Erro carregando textura: %s\n", SOIL_last_result());
+//     return texID;
+// }
+
+// // Inicializa as texturas do menu
+// void loadMenuComponents() {
+//     titleTexture = loadComps("images/titlemenu.png");
+//     pressSpaceTexture = loadComps("images/buttonmenu.png");
+// }
+
 void drawTexture(GLuint tex, float x, float y, float w, float h) {
     if (!tex) return;
-
+    
+    // Habilita blending para transparência
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
+    // Reseta a cor para branco puro (sem tingir a textura)
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex);
-
+    
     glBegin(GL_QUADS);
         glTexCoord2f(0, 0); glVertex2f(x, y);
         glTexCoord2f(1, 0); glVertex2f(x + w, y);
         glTexCoord2f(1, 1); glVertex2f(x + w, y + h);
         glTexCoord2f(0, 1); glVertex2f(x, y + h);
     glEnd();
-
+    
     glDisable(GL_TEXTURE_2D);
+    glDisable(GL_BLEND);
 }
 
 // Tela do menu principal
@@ -50,7 +84,7 @@ void drawMenu() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // Fundo simples
-    glColor3f(0.8f, 0.6f, 0.01f);
+    glColor3f(0.2f, 0.1f, 0.6f);
     glBegin(GL_QUADS);
         glVertex2f(0, 0);
         glVertex2f(LARGURA_JAN, 0);
