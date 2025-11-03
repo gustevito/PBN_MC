@@ -136,7 +136,7 @@ glutInit(&argc, argv);
     glutSpecialUpFunc(arrow_keys_up);
     
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     loadImages();
     initCM();
@@ -187,9 +187,13 @@ void drawBody(cpVect pos, cpFloat angle, UserData *ud)
     glTranslatef(pos.x, pos.y, 0);
     glRotatef(angle * C80PI, 0, 0, 1);
 
+    // Habilita blending para transparência
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
     glBindTexture(GL_TEXTURE_2D, ud->tex);
     glEnable(GL_TEXTURE_2D);
-    glColor3f(1, 1, 1);
+    glColor4f(1, 1, 1, 1);  // Mude de glColor3f para glColor4f com alpha = 1
     glBegin(GL_QUADS);
 
     glTexCoord2f(0, 0);
