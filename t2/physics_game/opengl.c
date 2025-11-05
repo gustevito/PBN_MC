@@ -37,7 +37,7 @@ GLuint backgroundTex;
 extern cpVect gravity;
 
 // Está aqui apenas para o teste de movimentação via teclado
-extern cpBody *playerBody;
+extern cpBody *playerCar;
 
 // Opções para o debugdraw
 cpSpaceDebugDrawOptions drawOptions;
@@ -354,7 +354,7 @@ void keyboardUp(unsigned char key, int x, int y)
 // processa movimento continuo
 void updateMovement()
 {
-    if (gameOver || !playerBody) return;
+    if (gameOver || !playerCar) return;
     
     int dx = 0, dy = 0;
     
@@ -372,8 +372,8 @@ void updateMovement()
     
     if (dx != 0 || dy != 0)
     {
-        cpVect pos = cpBodyGetPosition(playerBody);
-        cpBodyApplyImpulseAtWorldPoint(playerBody, cpv(dx, dy), pos);
+        cpVect pos = cpBodyGetPosition(playerCar);
+        cpBodyApplyImpulseAtWorldPoint(playerCar, cpv(dx, dy), pos);
     }
 }
 

@@ -45,16 +45,19 @@ cpSpace *space;
 // Paredes "invisíveis" do ambiente
 cpShape *leftWall, *rightWall, *topWall, *bottomWall;
 
+cpShape *finishLineCollision;
+
 // Tipos de objetos (para a determinação de colisões específicas)
 #define PLAYER 1
 #define TARGET 2 
 #define WALL 3
+#define FINISH_LINE 4
 
 // O "alvo"
 cpBody *targetBody;
 
 // Um jogador
-cpBody *playerBody;
+cpBody *playerCar;
 
 
 #ifdef _WIN32
@@ -98,6 +101,7 @@ void initCM()
     rightWall = newLine(WALL, cpv(LARGURA_JAN, 0), cpv(LARGURA_JAN, ALTURA_JAN), 0, 1.0);
     bottomWall = newLine(WALL, cpv(0, 0), cpv(LARGURA_JAN, 0), 0, 1.0);
     topWall = newLine(WALL, cpv(0, ALTURA_JAN), cpv(LARGURA_JAN, ALTURA_JAN), 0, 1.0);
+    finishLineCollision = newLine(FINISH_LINE, cpv(0, 850), cpv(LARGURA_JAN, 850), 0, 1.0); // finish line
 
     // Agora criamos um corpo...
     // Os parâmetros são:
@@ -109,10 +113,8 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    // targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/ship2.png", NULL, 0.2, 0.2);
-    targetBody = newCircle(TARGET, cpv(512, 350), 30, 10, "images/ship2.png", moveTarget, 0.2, 0.5);
-    
-    playerBody = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 50, 80, 10, "images/carrinhotop.png", NULL, 0.2, 0.5);
+    targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/ship2.png", NULL, 0.2, 0.2);
+    playerCar = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 50, 80, 10, "images/carrinhotop.png", NULL, 0.2, 0.5);
 
 
 
@@ -120,36 +122,8 @@ void initCM()
     cpBodySetType(targetBody, CP_BODY_TYPE_STATIC);
 
     // Tratamento de colisões: callback
-    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, PLAYER, WALL); 
+    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, PLAYER, FINISH_LINE); 
     handler->beginFunc = collisionHandler;
-}
-
-// Exemplo de função de movimentação: move o personagem em direção ao outro corpo
-void movePlayer(cpBody *body, void *data)
-{
-    // Veja como obter e limitar a velocidade do corpo:
-    cpVect vel = cpBodyGetVelocity(body);
-    // printf("\nvel: %f %f", vel.x,vel.y);
-
-    // Limita o vetor em 300 unidades
-    vel = cpvclamp(vel, 300);
-    // E seta novamente a velocidade do corpo
-    cpBodySetVelocity(body, vel);
-
-    // Obtém a posição dos dois corpos
-    cpVect playerPos = cpBodyGetPosition(body);
-    cpVect targetPos = cpBodyGetPosition(targetBody);
-
-    // Calcula um vetor do jogador ao alvo (DELTA = B - R)
-    cpVect pos = playerPos;
-    pos.x = -playerPos.x;
-    pos.y = -playerPos.y;
-    cpVect delta = cpvadd(targetPos, pos);
-
-    // Limita o impulso em 20 unidades
-    delta = cpvmult(cpvnormalize(delta), 20);
-    // Finalmente, aplica impulso no jogador
-    cpBodyApplyImpulseAtWorldPoint(body, delta, playerPos);
 }
 
 // Exemplo: move o alvo aleatoriamente
@@ -179,9 +153,9 @@ void freeCM()
     cpShapeFree(ud->shape);
     cpBodyFree(targetBody);
 
-    ud = cpBodyGetUserData(playerBody);
+    ud = cpBodyGetUserData(playerCar);
     cpShapeFree(ud->shape);
-    cpBodyFree(playerBody);
+    cpBodyFree(playerCar);
 
     cpShapeFree(leftWall);
     cpShapeFree(rightWall);
@@ -284,3 +258,37 @@ cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat heig
     printf("newRect: loaded img %s\n", img);
     return newBody;
 }
+
+
+
+
+
+
+
+// // Exemplo de função de movimentação: move o personagem em direção ao outro corpo
+// void movePlayer(cpBody *body, void *data)
+// {
+//     // Veja como obter e limitar a velocidade do corpo:
+//     cpVect vel = cpBodyGetVelocity(body);
+//     // printf("\nvel: %f %f", vel.x,vel.y);
+
+//     // Limita o vetor em 300 unidades
+//     vel = cpvclamp(vel, 300);
+//     // E seta novamente a velocidade do corpo
+//     cpBodySetVelocity(body, vel);
+
+//     // Obtém a posição dos dois corpos
+//     cpVect playerPos = cpBodyGetPosition(body);
+//     cpVect targetPos = cpBodyGetPosition(targetBody);
+
+//     // Calcula um vetor do jogador ao alvo (DELTA = B - R)
+//     cpVect pos = playerPos;
+//     pos.x = -playerPos.x;
+//     pos.y = -playerPos.y;
+//     cpVect delta = cpvadd(targetPos, pos);
+
+//     // Limita o impulso em 20 unidades
+//     delta = cpvmult(cpvnormalize(delta), 20);
+//     // Finalmente, aplica impulso no jogador
+//     cpBodyApplyImpulseAtWorldPoint(body, delta, playerPos);
+// }

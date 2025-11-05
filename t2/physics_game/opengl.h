@@ -16,11 +16,11 @@
 #include <stdlib.h>
 #include <chipmunk.h>
 
-#define LARGURA_JAN 712
-#define ALTURA_JAN 840
+#define LARGURA_JAN 840
+#define ALTURA_JAN 960
 
-#define XPOS_INICIO 400
-#define YPOS_INICIO 220
+#define XPOS_INICIO (LARGURA_JAN)/2
+#define YPOS_INICIO (ALTURA_JAN)/4
 
 typedef enum
 {
