@@ -17,6 +17,11 @@
 
 #define PLAYER_SPEED 20
 
+// tamanho do mapa
+float cameraX = 0.0f, cameraY = 0.0f;
+float mapWidth = 3000.0f;   // largura total do mapa
+float mapHeight = 2000.0f;  // altura total do mapa
+
 // movement fix ##
 extern int keys[256];
 extern int special_keys[256];
@@ -62,6 +67,7 @@ void reshape(int w, int h);
 void init(int argc, char **argv);
 void timer(int val);
 void updateMovement(); // movement fix ##
+void updateCamera();
 
 
 
@@ -153,8 +159,9 @@ glutInit(&argc, argv);
 
 void timer(int val)
 {
-    updateMovement(); // Processa movimento contínuo
+    updateMovement(); // processa movimento contínuo
     cpSpaceStep(space, timeStep);
+    updateCamera();
     glutTimerFunc(1, timer, 0);
     glutPostRedisplay();
 }
@@ -213,29 +220,55 @@ void drawBody(cpVect pos, cpFloat angle, UserData *ud)
     glPopMatrix();
 }
 
-// Desenha uma imagem retangular ocupando toda a janela
 void drawBackground()
 {
     glBindTexture(GL_TEXTURE_2D, backgroundTex);
     glEnable(GL_TEXTURE_2D);
     glColor3f(1, 1, 1);
-    glBegin(GL_QUADS);
 
-    glTexCoord2f(0, 0);
-    glVertex2f(0, 0);
+    float bgTileSize = 512.0f; // tamanho de um tile do fundo
+    float startX = floor(cameraX / bgTileSize) * bgTileSize;
+    float startY = floor(cameraY / bgTileSize) * bgTileSize;
 
-    glTexCoord2f(1, 0);
-    glVertex2f(LARGURA_JAN - 1, 0);
+    // desenha blocos de fundo que cobrem toda a tela
+    for (float x = startX; x < cameraX + LARGURA_JAN; x += bgTileSize) {
+        for (float y = startY; y < cameraY + ALTURA_JAN; y += bgTileSize) {
+            glBegin(GL_QUADS);
+                glTexCoord2f(0, 0); glVertex2f(x, y);
+                glTexCoord2f(1, 0); glVertex2f(x + bgTileSize, y);
+                glTexCoord2f(1, 1); glVertex2f(x + bgTileSize, y + bgTileSize);
+                glTexCoord2f(0, 1); glVertex2f(x, y + bgTileSize);
+            glEnd();
+        }
+    }
 
-    glTexCoord2f(1, 1);
-    glVertex2f(LARGURA_JAN - 1, ALTURA_JAN - 1);
-
-    glTexCoord2f(0, 1);
-    glVertex2f(0, ALTURA_JAN - 1);
-
-    glEnd();
     glDisable(GL_TEXTURE_2D);
 }
+
+
+// // Desenha uma imagem retangular ocupando toda a janela
+// void drawBackground()
+// {
+//     glBindTexture(GL_TEXTURE_2D, backgroundTex);
+//     glEnable(GL_TEXTURE_2D);
+//     glColor3f(1, 1, 1);
+//     glBegin(GL_QUADS);
+
+//     glTexCoord2f(0, 0);
+//     glVertex2f(0, 0);
+
+//     glTexCoord2f(1, 0);
+//     glVertex2f(LARGURA_JAN - 1, 0);
+
+//     glTexCoord2f(1, 1);
+//     glVertex2f(LARGURA_JAN - 1, ALTURA_JAN - 1);
+
+//     glTexCoord2f(0, 1);
+//     glVertex2f(0, ALTURA_JAN - 1);
+
+//     glEnd();
+//     glDisable(GL_TEXTURE_2D);
+// }
 
 // Escreve o score na tela
 void drawScore()
@@ -268,6 +301,10 @@ void display()
 
     // se gameState == 1, desenha o jogo normalmente
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glTranslatef(-cameraX, -cameraY, 0); // aplica transformaçao de camera
+    
     drawBackground();
     drawScore();
     cpSpaceEachBody(space, eachBodyFunc, NULL);
@@ -376,6 +413,25 @@ void updateMovement()
         cpBodyApplyImpulseAtWorldPoint(playerCar, cpv(dx, dy), pos);
     }
 }
+
+void updateCamera()
+{
+    if (!playerCar) return;
+
+    // Posição do jogador
+    cpVect playerPos = cpBodyGetPosition(playerCar);
+
+    // Centraliza a câmera no jogador
+    cameraX = playerPos.x - (LARGURA_JAN / 2);
+    cameraY = playerPos.y - (ALTURA_JAN / 2);
+
+    // Impede que a câmera saia fora dos limites do mapa
+    if (cameraX < 0) cameraX = 0;
+    if (cameraY < 0) cameraY = 0;
+    if (cameraX > mapWidth - LARGURA_JAN) cameraX = mapWidth - LARGURA_JAN;
+    if (cameraY > mapHeight - ALTURA_JAN) cameraY = mapHeight - ALTURA_JAN;
+}
+
 
 //
 // Funções para o debug draw da Chipmunk

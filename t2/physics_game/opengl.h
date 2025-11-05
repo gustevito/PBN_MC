@@ -22,6 +22,9 @@
 #define XPOS_INICIO (LARGURA_JAN)/2
 #define YPOS_INICIO (ALTURA_JAN)/4
 
+extern float mapWidth;
+extern float mapHeight;
+
 typedef enum
 {
     CIRCLE,

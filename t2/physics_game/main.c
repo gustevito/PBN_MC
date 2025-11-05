@@ -97,11 +97,12 @@ void initCM()
     cpSpaceSetGravity(space, cpv(0,0));
 
     // Adiciona 4 linhas estáticas para formarem as "paredes" do ambiente
-    leftWall = newLine(WALL, cpv(0, 0), cpv(0, ALTURA_JAN), 0, 1.0);
-    rightWall = newLine(WALL, cpv(LARGURA_JAN, 0), cpv(LARGURA_JAN, ALTURA_JAN), 0, 1.0);
-    bottomWall = newLine(WALL, cpv(0, 0), cpv(LARGURA_JAN, 0), 0, 1.0);
-    topWall = newLine(WALL, cpv(0, ALTURA_JAN), cpv(LARGURA_JAN, ALTURA_JAN), 0, 1.0);
-    finishLineCollision = newLine(FINISH_LINE, cpv(0, 850), cpv(LARGURA_JAN, 850), 0, 1.0); // finish line
+    leftWall = newLine(WALL, cpv(0, 0), cpv(0, mapHeight), 0, 1.0);
+    rightWall = newLine(WALL, cpv(mapWidth, 0), cpv(mapWidth, mapHeight), 0, 1.0);
+    bottomWall = newLine(WALL, cpv(0, 0), cpv(mapWidth, 0), 0, 1.0);
+    topWall = newLine(WALL, cpv(0, mapHeight), cpv(mapWidth, mapHeight), 0, 1.0);
+
+    // finishLineCollision = newLine(FINISH_LINE, cpv(0, 850), cpv(LARGURA_JAN, 850), 0, 1.0); // finish line
 
     // Agora criamos um corpo...
     // Os parâmetros são:
