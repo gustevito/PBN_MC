@@ -47,6 +47,8 @@ extern cpBody *playerCar;
 // Opções para o debugdraw
 cpSpaceDebugDrawOptions drawOptions;
 
+extern void updateCarPhysics();
+
 // Funções presentes em main.c
 extern void initCM();
 extern void freeCM();
@@ -159,7 +161,8 @@ glutInit(&argc, argv);
 
 void timer(int val)
 {
-    updateMovement(); // processa movimento contínuo
+    updateCarPhysics();
+    // updateMovement(); // processa movimento contínuo
     cpSpaceStep(space, timeStep);
     updateCamera();
     glutTimerFunc(1, timer, 0);
@@ -388,31 +391,31 @@ void keyboardUp(unsigned char key, int x, int y)
     keys[key] = 0;
 }
 
-// processa movimento continuo
-void updateMovement()
-{
-    if (gameOver || !playerCar) return;
+// // processa movimento continuo (primeiro fix)
+// void updateMovement()
+// {
+//     if (gameOver || !playerCar) return;
     
-    int dx = 0, dy = 0;
+//     int dx = 0, dy = 0;
     
-    // Verifica teclas normais
-    if (keys['w'] || keys['W']) dy -= PLAYER_SPEED;
-    if (keys['s'] || keys['S']) dy += PLAYER_SPEED;
-    if (keys['a'] || keys['A']) dx -= PLAYER_SPEED;
-    if (keys['d'] || keys['D']) dx += PLAYER_SPEED;
+//     // Verifica teclas normais
+//     if (keys['w'] || keys['W']) dy -= PLAYER_SPEED;
+//     if (keys['s'] || keys['S']) dy += PLAYER_SPEED;
+//     if (keys['a'] || keys['A']) dx -= PLAYER_SPEED;
+//     if (keys['d'] || keys['D']) dx += PLAYER_SPEED;
     
-    // Verifica teclas especiais (setas)
-    if (special_keys[GLUT_KEY_UP]) dy -= PLAYER_SPEED;
-    if (special_keys[GLUT_KEY_DOWN]) dy += PLAYER_SPEED;
-    if (special_keys[GLUT_KEY_LEFT]) dx -= PLAYER_SPEED;
-    if (special_keys[GLUT_KEY_RIGHT]) dx += PLAYER_SPEED;
+//     // Verifica teclas especiais (setas)
+//     if (special_keys[GLUT_KEY_UP]) dy -= PLAYER_SPEED;
+//     if (special_keys[GLUT_KEY_DOWN]) dy += PLAYER_SPEED;
+//     if (special_keys[GLUT_KEY_LEFT]) dx -= PLAYER_SPEED;
+//     if (special_keys[GLUT_KEY_RIGHT]) dx += PLAYER_SPEED;
     
-    if (dx != 0 || dy != 0)
-    {
-        cpVect pos = cpBodyGetPosition(playerCar);
-        cpBodyApplyImpulseAtWorldPoint(playerCar, cpv(dx, dy), pos);
-    }
-}
+//     if (dx != 0 || dy != 0)
+//     {
+//         cpVect pos = cpBodyGetPosition(playerCar);
+//         cpBodyApplyImpulseAtWorldPoint(playerCar, cpv(dx, dy), pos);
+//     }
+// }
 
 void updateCamera()
 {

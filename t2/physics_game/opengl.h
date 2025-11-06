@@ -25,6 +25,8 @@
 extern float mapWidth;
 extern float mapHeight;
 
+
+
 typedef enum
 {
     CIRCLE,
