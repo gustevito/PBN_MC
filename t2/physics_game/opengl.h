@@ -16,7 +16,7 @@
 #include <stdlib.h>
 #include <chipmunk.h>
 
-#define LARGURA_JAN 840
+#define LARGURA_JAN 800
 #define ALTURA_JAN 960
 
 #define XPOS_INICIO (LARGURA_JAN)/2

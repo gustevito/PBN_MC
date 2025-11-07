@@ -114,8 +114,8 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/ship2.png", NULL, 0.2, 0.2);
-    playerCar = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 50, 80, 10, "images/carrinhotop.png", NULL, 0.2, 0.5);
+    targetBody = newRect(TARGET, cpv(200, 200), 30, 30, 1, "images/tile000.png", NULL, 0.2, 0.2);
+    playerCar = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 50, 80, 10, "images/tile000.png", NULL, 0.2, 0.5);
 
 
 
@@ -235,7 +235,7 @@ cpBody *newCircle(cpCollisionType objType, cpVect pos, cpFloat radius, cpFloat m
 
 cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat height, cpFloat mass, char *img, bodyMotionFunc func, cpFloat fric, cpFloat elast)
 {
-    cpFloat radius = width > height ? width : height;
+    cpFloat radius = 0.01;
     cpFloat moment = cpMomentForBox(mass, width, height);
 
     cpBody *newBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
