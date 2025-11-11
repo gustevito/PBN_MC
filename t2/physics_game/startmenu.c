@@ -32,8 +32,6 @@ void loadMenuComponents()
 {
     titleTexture = loadComps("images/titlemenu.png");
     pressSpaceTexture = loadComps("images/buttonmenu.png");
-    printf("Title Texture ID: %d\n", titleTexture);
-    printf("Button Texture ID: %d\n", pressSpaceTexture);
 }
 
 // Função para carregar textura com SOIL

@@ -15,12 +15,10 @@
 #define M_PI 3.14159265358979323846
 #endif // M_PI
 
-#define PLAYER_SPEED 20
-
 // tamanho do mapa
 float cameraX = 0.0f, cameraY = 0.0f;
-float mapWidth = 3000.0f;   // largura total do mapa
-float mapHeight = 2000.0f;  // altura total do mapa
+float mapWidth = 2400.0f;   // largura total do mapa
+float mapHeight = 1300.0f;  // altura total do mapa
 
 // movement fix ##
 extern int keys[256];
@@ -110,7 +108,7 @@ GLuint loadImage(char *img)
 
 void loadImages()
 {
-    backgroundTex = loadImage("images/winterbackground.jpg");
+    backgroundTex = loadImage("images/ice.png");
     printf("Background tex id: %d\n", backgroundTex);
 }
 
@@ -130,13 +128,15 @@ glutInit(&argc, argv);
 
     // Define o tamanho da janela gráfica do programa
     glutInitWindowSize(LARGURA_JAN, ALTURA_JAN);
-    glutCreateWindow("Physics Game");
+    glutCreateWindow("PHYSIKZ");
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     glutKeyboardFunc(keyboard);
     glutSpecialFunc(arrow_keys);
-    glutKeyboardFunc(menuKeyboard);
+    if (gameState == 0)
+        glutKeyboardFunc(menuKeyboard);
+
     glutTimerFunc(1, timer, 0);
     
     // movement fix ##
@@ -311,7 +311,7 @@ void display()
     drawBackground();
     drawScore();
     cpSpaceEachBody(space, eachBodyFunc, NULL);
-    cpSpaceDebugDraw(space, &drawOptions);
+    // cpSpaceDebugDraw(space, &drawOptions);
     glutSwapBuffers();
 }
 
