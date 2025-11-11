@@ -114,8 +114,8 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    targetBody = newRect(TARGET, cpv(200, 200), 50, 100, 1, "images/car.png", NULL, 0.2, 0.2);
-    playerCar = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 50, 100, 10, "images/carv2.png", NULL, 0.2, 0.5);
+    targetBody = newRect(TARGET, cpv(200, 200), 25, 50, 1, "images/car.png", NULL, 0.2, 0.2);
+    playerCar = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 25, 50, 10, "images/carv2.png", NULL, 0.2, 0.5);
 
 
 

@@ -17,8 +17,8 @@
 
 // tamanho do mapa
 float cameraX = 0.0f, cameraY = 0.0f;
-float mapWidth = 2400.0f;   // largura total do mapa
-float mapHeight = 1300.0f;  // altura total do mapa
+float mapWidth = LARGURA_JAN;   // largura total do mapa
+float mapHeight = ALTURA_JAN;  // altura total do mapa
 
 // movement fix ##
 extern int keys[256];
