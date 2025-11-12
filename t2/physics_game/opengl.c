@@ -2,14 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include <SOIL.h>
-
-// ************************************************************
-//
-// A PARTIR DESTE PONTO, O PROGRAMA NÃO DEVE SER ALTERADO
-//
-// A NÃO SER QUE VOCÊ SAIBA ***EXATAMENTE*** O QUE ESTÁ FAZENDO
-//
-// ************************************************************
+#include <ctype.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -36,11 +29,10 @@ extern int gameOver;
 
 GLuint backgroundTex;
 
-// Gravidade: usada aqui apenas para testar o liga/desliga
 extern cpVect gravity;
 
 // Está aqui apenas para o teste de movimentação via teclado
-extern cpBody *playerCar;
+extern cpBody *playerOne;
 
 // Opções para o debugdraw
 cpSpaceDebugDrawOptions drawOptions;
@@ -139,7 +131,7 @@ glutInit(&argc, argv);
 
     glutTimerFunc(1, timer, 0);
     
-    // movement fix ##
+    // movement fix ## 
     glutKeyboardUpFunc(keyboardUp);
     glutSpecialUpFunc(arrow_keys_up);
     
@@ -249,30 +241,6 @@ void drawBackground()
 }
 
 
-// // Desenha uma imagem retangular ocupando toda a janela
-// void drawBackground()
-// {
-//     glBindTexture(GL_TEXTURE_2D, backgroundTex);
-//     glEnable(GL_TEXTURE_2D);
-//     glColor3f(1, 1, 1);
-//     glBegin(GL_QUADS);
-
-//     glTexCoord2f(0, 0);
-//     glVertex2f(0, 0);
-
-//     glTexCoord2f(1, 0);
-//     glVertex2f(LARGURA_JAN - 1, 0);
-
-//     glTexCoord2f(1, 1);
-//     glVertex2f(LARGURA_JAN - 1, ALTURA_JAN - 1);
-
-//     glTexCoord2f(0, 1);
-//     glVertex2f(0, ALTURA_JAN - 1);
-
-//     glEnd();
-//     glDisable(GL_TEXTURE_2D);
-// }
-
 // Escreve o score na tela
 void drawScore()
 {
@@ -348,8 +316,13 @@ void reshape(int w, int h)
 // Callback de teclado
 void keyboard(unsigned char key, int x, int y)
 {
+    if (gameState == 0) {
+        menuKeyboard(key, x, y);
+        return;
+    }
+
     keys[key] = 1; // Marca tecla como pressionada
-    
+
     switch (key)
     {
     case 27:
@@ -389,40 +362,17 @@ void arrow_keys_up(int key, int x, int y)
 void keyboardUp(unsigned char key, int x, int y)
 {
     keys[key] = 0;
+    keys[toupper(key)] = 0;  // Limpa ambas versões da tecla
+    keys[tolower(key)] = 0;
 }
 
-// // processa movimento continuo (primeiro fix)
-// void updateMovement()
-// {
-//     if (gameOver || !playerCar) return;
-    
-//     int dx = 0, dy = 0;
-    
-//     // Verifica teclas normais
-//     if (keys['w'] || keys['W']) dy -= PLAYER_SPEED;
-//     if (keys['s'] || keys['S']) dy += PLAYER_SPEED;
-//     if (keys['a'] || keys['A']) dx -= PLAYER_SPEED;
-//     if (keys['d'] || keys['D']) dx += PLAYER_SPEED;
-    
-//     // Verifica teclas especiais (setas)
-//     if (special_keys[GLUT_KEY_UP]) dy -= PLAYER_SPEED;
-//     if (special_keys[GLUT_KEY_DOWN]) dy += PLAYER_SPEED;
-//     if (special_keys[GLUT_KEY_LEFT]) dx -= PLAYER_SPEED;
-//     if (special_keys[GLUT_KEY_RIGHT]) dx += PLAYER_SPEED;
-    
-//     if (dx != 0 || dy != 0)
-//     {
-//         cpVect pos = cpBodyGetPosition(playerCar);
-//         cpBodyApplyImpulseAtWorldPoint(playerCar, cpv(dx, dy), pos);
-//     }
-// }
 
 void updateCamera()
 {
-    if (!playerCar) return;
+    if (!playerOne) return;
 
     // Posição do jogador
-    cpVect playerPos = cpBodyGetPosition(playerCar);
+    cpVect playerPos = cpBodyGetPosition(playerOne);
 
     // Centraliza a câmera no jogador
     cameraX = playerPos.x - (LARGURA_JAN / 2);
@@ -496,3 +446,56 @@ void glutBitmapString(void *font, char *string)
 }
 
 #endif
+
+
+
+// // Desenha uma imagem retangular ocupando toda a janela
+// void drawBackground()
+// {
+//     glBindTexture(GL_TEXTURE_2D, backgroundTex);
+//     glEnable(GL_TEXTURE_2D);
+//     glColor3f(1, 1, 1);
+//     glBegin(GL_QUADS);
+
+//     glTexCoord2f(0, 0);
+//     glVertex2f(0, 0);
+
+//     glTexCoord2f(1, 0);
+//     glVertex2f(LARGURA_JAN - 1, 0);
+
+//     glTexCoord2f(1, 1);
+//     glVertex2f(LARGURA_JAN - 1, ALTURA_JAN - 1);
+
+//     glTexCoord2f(0, 1);
+//     glVertex2f(0, ALTURA_JAN - 1);
+
+//     glEnd();
+//     glDisable(GL_TEXTURE_2D);
+// }
+
+
+// // processa movimento continuo (primeiro fix)
+// void updateMovement()
+// {
+//     if (gameOver || !playerOne) return;
+    
+//     int dx = 0, dy = 0;
+    
+//     // Verifica teclas normais
+//     if (keys['w'] || keys['W']) dy -= PLAYER_SPEED;
+//     if (keys['s'] || keys['S']) dy += PLAYER_SPEED;
+//     if (keys['a'] || keys['A']) dx -= PLAYER_SPEED;
+//     if (keys['d'] || keys['D']) dx += PLAYER_SPEED;
+    
+//     // Verifica teclas especiais (setas)
+//     if (special_keys[GLUT_KEY_UP]) dy -= PLAYER_SPEED;
+//     if (special_keys[GLUT_KEY_DOWN]) dy += PLAYER_SPEED;
+//     if (special_keys[GLUT_KEY_LEFT]) dx -= PLAYER_SPEED;
+//     if (special_keys[GLUT_KEY_RIGHT]) dx += PLAYER_SPEED;
+    
+//     if (dx != 0 || dy != 0)
+//     {
+//         cpVect pos = cpBodyGetPosition(playerOne);
+//         cpBodyApplyImpulseAtWorldPoint(playerOne, cpv(dx, dy), pos);
+//     }
+// }

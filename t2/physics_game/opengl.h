@@ -19,8 +19,17 @@
 #define LARGURA_JAN 1824
 #define ALTURA_JAN 962
 
-#define XPOS_INICIO (LARGURA_JAN)/2
-#define YPOS_INICIO (ALTURA_JAN)/4
+// PLAYER 1
+#define XPOS_PLAYER1 (LARGURA_JAN)/6
+#define YPOS_PLAYER1 (ALTURA_JAN)/2
+
+// PLAYER 2
+#define XPOS_PLAYER2 (LARGURA_JAN)/1.2
+#define YPOS_PLAYER2 (ALTURA_JAN)/2
+
+// DISK
+#define XPOS_DISK (LARGURA_JAN)/2
+#define YPOS_DISK (ALTURA_JAN)/2
 
 extern float mapWidth;
 extern float mapHeight;

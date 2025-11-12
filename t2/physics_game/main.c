@@ -48,17 +48,16 @@ cpShape *leftWall, *rightWall, *topWall, *bottomWall;
 cpShape *finishLineCollision;
 
 // Tipos de objetos (para a determinação de colisões específicas)
-#define PLAYER 1
-#define TARGET 2 
+#define PLAYERONE 1
+#define PLAYERTWO 2
 #define WALL 3
-#define FINISH_LINE 4
+#define DISK 4
+#define GOAL 5
 
-// O "alvo"
-cpBody *targetBody;
-
-// Um jogador
-cpBody *playerCar;
-
+cpBody *playerOne;
+cpBody *playerTwo;
+cpBody *disk;
+cpBody *goal;
 
 #ifdef _WIN32
 // Aparentemente não é mais necessário que seja 240
@@ -92,7 +91,7 @@ void initCM()
     // Cria o universo
     space = cpSpaceNew();
     // Seta o fator de damping, isto é, de atrito do ar (10% da velocidade é perdida a cada segundo)
-    cpSpaceSetDamping(space, 0.5);
+    cpSpaceSetDamping(space, 0.6);
 
     cpSpaceSetGravity(space, cpv(0,0));
 
@@ -102,8 +101,9 @@ void initCM()
     bottomWall = newLine(WALL, cpv(0, 0), cpv(mapWidth, 0), 0, 1.0);
     topWall = newLine(WALL, cpv(0, mapHeight), cpv(mapWidth, mapHeight), 0, 1.0);
 
-    // finishLineCollision = newLine(FINISH_LINE, cpv(0, 850), cpv(LARGURA_JAN, 850), 0, 1.0); // finish line
-
+    goal = newRect(GOAL, cpv(mapWidth, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
+    goal = newRect(GOAL, cpv(0, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
+    
     // Agora criamos um corpo...
     // Os parâmetros são:
     //   - posição: cpVect (vetor: x e y)
@@ -114,49 +114,35 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    targetBody = newRect(TARGET, cpv(200, 200), 25, 50, 1, "images/car.png", NULL, 0.2, 0.2);
-    playerCar = newRect(PLAYER, cpv(XPOS_INICIO, YPOS_INICIO), 25, 50, 10, "images/carv2.png", NULL, 0.2, 0.5);
+    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 30, 60, 10, "images/carv2.png", NULL, 0.2, 0.5);
+    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 30, 60, 10, "images/carv2.png", NULL, 0.2, 0.5);
+    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 100, 10, "images/hockeydisk.png", NULL, 0.1, 1);
+    
 
-
-
-    // Se você quiser criar um corpo ESTÁTICO, isto é, que não irá se movimentar, faça:
-    cpBodySetType(targetBody, CP_BODY_TYPE_STATIC);
+    cpBodySetType(goal, CP_BODY_TYPE_STATIC);
 
     // Tratamento de colisões: callback
-    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, PLAYER, FINISH_LINE); 
+    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, DISK, GOAL); 
     handler->beginFunc = collisionHandler;
 }
 
-// Exemplo: move o alvo aleatoriamente
-void moveTarget(cpBody *body, void *data)
-{
-    cpVect vel = cpBodyGetVelocity(body);
-    // printf("vel: %f %f", vel.x,vel.y);
-
-    // Limita o vetor em 300 unidades
-    vel = cpvclamp(vel, 300);
-    // E seta novamente a velocidade do corpo
-    cpBodySetVelocity(body, vel);
-
-    // Sorteia um impulso entre -10 e 10, para x e y
-    // Depois normaliza e limita o vetor em 50 unidades
-    cpVect impulso = cpvmult(cpvnormalize(cpv(rand() % 20 - 10, rand() % 20 - 10)), 100);
-    // E aplica no corpo
-    cpBodyApplyImpulseAtWorldPoint(body, impulso, cpBodyGetPosition(body));
-}
 
 // Libera memória ocupada por cada corpo, forma e ambiente
 // Acrescente mais linhas caso necessário
 void freeCM()
 {
     printf("Cleaning up!\n");
-    UserData *ud = cpBodyGetUserData(targetBody);
+    UserData *ud = cpBodyGetUserData(playerTwo);
     cpShapeFree(ud->shape);
-    cpBodyFree(targetBody);
+    cpBodyFree(playerTwo);
 
-    ud = cpBodyGetUserData(playerCar);
+    ud = cpBodyGetUserData(playerOne);
     cpShapeFree(ud->shape);
-    cpBodyFree(playerCar);
+    cpBodyFree(playerOne);
+
+    ud = cpBodyGetUserData(disk);
+    cpShapeFree(ud->shape);
+    cpBodyFree(disk);
 
     cpShapeFree(leftWall);
     cpShapeFree(rightWall);
@@ -177,14 +163,6 @@ void restartCM()
     // Não esqueça de ressetar a variável gameOver!
     gameOver = 0;
 }
-
-// ************************************************************
-//
-// A PARTIR DESTE PONTO, O PROGRAMA NÃO DEVE SER ALTERADO
-//
-// A NÃO SER QUE VOCÊ SAIBA ***EXATAMENTE*** O QUE ESTÁ FAZENDO
-//
-// ************************************************************
 
 int main(int argc, char **argv)
 {
@@ -280,7 +258,7 @@ cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat heig
 
 //     // Obtém a posição dos dois corpos
 //     cpVect playerPos = cpBodyGetPosition(body);
-//     cpVect targetPos = cpBodyGetPosition(targetBody);
+//     cpVect targetPos = cpBodyGetPosition(playerTwo);
 
 //     // Calcula um vetor do jogador ao alvo (DELTA = B - R)
 //     cpVect pos = playerPos;
