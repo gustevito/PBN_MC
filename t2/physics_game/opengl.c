@@ -24,7 +24,7 @@ extern int gameState;
 void drawMenu();
 void menuKeyboard(unsigned char key, int x, int y);
 
-extern int score;
+extern int score_playerOne;
 extern int gameOver; 
 
 GLuint backgroundTex;
@@ -243,7 +243,7 @@ void drawBackground()
 void drawScore()
 {
     char strscore[30];
-    sprintf(strscore, "Score: %d", score);
+    sprintf(strscore, "Score: %d", score_playerOne);
     // Sistema de coordenadas: Y cresce para BAIXO
     glRasterPos2i(20, 30);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18, strscore);
@@ -253,7 +253,7 @@ void drawScore()
     {
         char strgameover[100];
         glRasterPos2i(LARGURA_JAN / 2 - 200, ALTURA_JAN / 2);
-        sprintf(strgameover, "Game Over (score: %d)", score);
+        sprintf(strgameover, "Game Over (score: %d)", score_playerOne);
         glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, strgameover);
     }
 }

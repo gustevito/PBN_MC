@@ -26,8 +26,9 @@ cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat heig
 #define STATE_GAME 1
 int gameState = STATE_MENU;
 
-// Score do jogo
-int score = 0;
+// score_playerOne do jogo
+int score_playerOne = 0;
+int score_playerTwo = 0;
 
 // Flag de controle: 1 se o jogo tiver acabado
 int gameOver = 0;
@@ -75,9 +76,8 @@ cpBool collisionHandler(cpArbiter *arb, cpSpace *space, void *data)
     if (gameOver)
         return cpTrue;
 
-    // Teste: Incrementa o score ao bater na parede
-    score++;
-    printf("Score: %d\n", score);
+    score_playerOne++;
+    printf("score_playerOne: %d\n", score_playerOne);
     return cpTrue;
 }
 
@@ -157,7 +157,7 @@ void freeCM()
 // Função chamada para reiniciar a simulação
 void restartCM()
 {
-    // Escreva o código para reposicionar os personagens, ressetar o score, etc.
+    // Escreva o código para reposicionar os personagens, ressetar o score_playerOne, etc.
 
     // Não esqueça de ressetar a variável gameOver!
     gameOver = 0;
