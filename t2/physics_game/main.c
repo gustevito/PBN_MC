@@ -57,7 +57,8 @@ cpShape *finishLineCollision;
 cpBody *playerOne;
 cpBody *playerTwo;
 cpBody *disk;
-cpBody *goal;
+cpBody *goal1;
+cpBody *goal2;
 
 #ifdef _WIN32
 // Aparentemente não é mais necessário que seja 240
@@ -101,8 +102,8 @@ void initCM()
     bottomWall = newLine(WALL, cpv(0, 0), cpv(mapWidth, 0), 0, 1.0);
     topWall = newLine(WALL, cpv(0, mapHeight), cpv(mapWidth, mapHeight), 0, 1.0);
 
-    goal = newRect(GOAL, cpv(mapWidth, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
-    goal = newRect(GOAL, cpv(0, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
+    goal1 = newRect(GOAL, cpv(mapWidth, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
+    goal2 = newRect(GOAL, cpv(0, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
     
     // Agora criamos um corpo...
     // Os parâmetros são:
@@ -114,12 +115,13 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 30, 60, 10, "images/carv2.png", NULL, 0.2, 0.5);
-    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 30, 60, 10, "images/carv2.png", NULL, 0.2, 0.5);
-    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 100, 10, "images/hockeydisk.png", NULL, 0.1, 1);
+    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 30, 60, 10, "images/carv2.png", NULL, 0.5, 0.2);
+    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 30, 60, 10, "images/carv2.png", NULL, 0.5, 0.2);
+    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 100, 1, "images/hockeydisk.png", NULL, 0.9, 0.1);
     
 
-    cpBodySetType(goal, CP_BODY_TYPE_STATIC);
+    cpBodySetType(goal1, CP_BODY_TYPE_STATIC);
+    cpBodySetType(goal2, CP_BODY_TYPE_STATIC);
 
     // Tratamento de colisões: callback
     cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, DISK, GOAL); 
@@ -155,9 +157,6 @@ void freeCM()
 // Função chamada para reiniciar a simulação
 void restartCM()
 {
-    // movement fix ## reset de teclas
-    // memset(keys, 0, sizeof(keys));
-    // memset(special_keys, 0, sizeof(special_keys));
     // Escreva o código para reposicionar os personagens, ressetar o score, etc.
 
     // Não esqueça de ressetar a variável gameOver!

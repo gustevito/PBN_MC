@@ -113,27 +113,25 @@ cpSpaceDebugColor ColorForShape(cpShape *shape, cpDataPointer data)
 
 void init(int argc, char **argv)
 {
-glutInit(&argc, argv);
-
+    glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowPosition(10, 10);
-
-    // Define o tamanho da janela gráfica do programa
     glutInitWindowSize(LARGURA_JAN, ALTURA_JAN);
     glutCreateWindow("PHYSIKZ");
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    glutKeyboardFunc(keyboard);
-    glutSpecialFunc(arrow_keys);
-    if (gameState == 0)
-        glutKeyboardFunc(menuKeyboard);
+    
+    // IMPORTANTE: Registrar TODOS os callbacks de uma vez
+    glutKeyboardFunc(keyboard);         // Sempre usa keyboard()
+    glutKeyboardUpFunc(keyboardUp);     // Para quando solta a tecla
+    glutSpecialFunc(arrow_keys);        // Teclas especiais (setas)
+    glutSpecialUpFunc(arrow_keys_up);   // Quando solta teclas especiais
+    
+    // NÃO sobrescrever com menuKeyboard aqui!
+    // O tratamento do menu será feito DENTRO de keyboard()
 
     glutTimerFunc(1, timer, 0);
-    
-    // movement fix ## 
-    glutKeyboardUpFunc(keyboardUp);
-    glutSpecialUpFunc(arrow_keys_up);
     
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -313,36 +311,32 @@ void reshape(int w, int h)
     glLoadIdentity();
 }
 
-// Callback de teclado
+// Callback de teclado - MELHORADA
 void keyboard(unsigned char key, int x, int y)
 {
+    
+    keys[key] = 1;
+    keys[toupper(key)] = 1;
+    keys[tolower(key)] = 1;
+    
     if (gameState == 0) {
         menuKeyboard(key, x, y);
         return;
     }
-
-    keys[key] = 1; // Marca tecla como pressionada
-
+    
     switch (key)
     {
-    case 27:
+    case 27:  // ESC
         freeCM();
         exit(1);
         break;
     case 'f':
+    case 'F':
         gameOver = 1;
         break;
     case 'r':
+    case 'R':
         restartCM();
-        break;
-    case 'g':
-        cpVect grav = cpSpaceGetGravity(space);
-        if (grav.y == 0)
-            grav.y = gravity.y;
-        else
-            grav.y = 0;
-        printf("Gravity: %f\n", grav.y);
-        cpSpaceSetGravity(space, grav);
         break;
     }
 }

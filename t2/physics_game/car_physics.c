@@ -46,22 +46,32 @@ void updateCarPhysics()
     cpVect vel = cpBodyGetVelocity(playerOne);
     float speed = cpvlength(vel);
 
-    // Debug 
-    // static int lastBrake = 0, lastBoost = 0;
-    // if (brakeKey != lastBrake) {
-    //     printf("Brake: %s (speed: %.1f)\n", brakeKey ? "ON" : "OFF", speed);
-    //     lastBrake = brakeKey;
-    // }
-    // if (boostKey != lastBoost) {
-    //     printf("Boost: %s (speed: %.1f)\n", boostKey ? "ON" : "OFF", speed);
-    //     lastBoost = boostKey;
-    // }
-
-    // movimento básico
+    // Força do motor base
+    float motorForce = 0.0f;
     if (forwardKey)
-        cpBodyApplyForceAtWorldPoint(playerOne, cpvmult(forward, ENGINE_FORCE), pos);
+    {
+        motorForce = ENGINE_FORCE;
+        if (boostKey)
+        {
+            motorForce = BOOST_FORCE; // Boost só funciona acelerando
+        }
+    }
     else if (backwardKey)
-        cpBodyApplyForceAtWorldPoint(playerOne, cpvmult(forward, -ENGINE_FORCE * 0.6f), pos);
+    {
+        motorForce = -ENGINE_FORCE * 0.6f;
+    }
+
+    // Aplicar força do motor
+    if (motorForce != 0.0f)
+    {
+        cpBodyApplyForceAtWorldPoint(playerOne, cpvmult(forward, motorForce), pos);
+    }
+
+    // // movimento básico
+    // if (forwardKey)
+    //     cpBodyApplyForceAtWorldPoint(playerOne, cpvmult(forward, ENGINE_FORCE), pos);
+    // else if (backwardKey)
+    //     cpBodyApplyForceAtWorldPoint(playerOne, cpvmult(forward, -ENGINE_FORCE * 0.6f), pos);
 
     // frenagem (Z)
     if (brakeKey && speed > 10.0f)
@@ -86,16 +96,11 @@ void updateCarPhysics()
         targetSteering = 1.0f;
     steering += (targetSteering - steering) * STEERING_ACCEL;
 
-    // if (leftKey)
-    //     steering -= TURN_SPEED;
-    // else if (rightKey)
-    //     steering += TURN_SPEED;
-    // else
-    //     steering *= 0.1f;
 
     // suavizar curva conforme a velocidade
     float speedFactor = fminf(speed / MAX_SPEED, 2.0f);
     cpBodySetAngularVelocity(playerOne, steering * speedFactor * 20.0f);
+    
     // cpBodySetAngle(playerOne, angle + steering * (speedFactor * 0.3f));
 
     // limitar velocidade máxima
