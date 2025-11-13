@@ -9,7 +9,7 @@ int testBit(unsigned int v, int bit);
 int main()
 {
     unsigned int valor;
-    valor = 0b10010100;
+    valor = 0b10001011; // 139
     printf("Bit 7 está ligado: ");
     printf("%d\n", testBit(valor, 7));
     printf("Bit 5 está ligado: ");
@@ -19,7 +19,7 @@ int main()
     exibeInt(valor);
 
     printf("Ligando o bit 3\n");
-    valor = setBit(valor, 3);
+    valor = setBit(valor, 4);
     printf("Valor: %d\n", valor);
     exibeInt(valor);
 
@@ -53,11 +53,8 @@ void exibeInt(unsigned int v)
 
 unsigned int clearBit(unsigned int v, int bit)
 {
-    // Mesma forma de montar a máscara,
-    // MAS invertendo os bits no final
     unsigned int mascara = ~(1 << bit);
     exibeInt(mascara);
-    // DESLIGA o bit
     v = v & mascara;
     return v;
 }

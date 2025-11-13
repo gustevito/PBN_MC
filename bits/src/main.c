@@ -1,45 +1,71 @@
 #include <stdio.h>
 
-void exibeInt(unsigned int v);
-unsigned int clearBit(unsigned int v, int bit);
-unsigned int invertBit(unsigned int v, int bit);
-unsigned int setBit(unsigned int v, int bit);
-int testBit(unsigned int v, int bit);
+unsigned int clear(unsigned int val);
+unsigned int setbit(unsigned int val, int bit);
+unsigned int clearbit(unsigned int val, int bit);
+unsigned int invertbit(unsigned int val, int bit);
+unsigned int testbit(unsigned int val, int bit);
 
 int main(int argc, char const *argv[])
 {
-    unsigned int valor = 0b10010100; // 148
-    printf("%d", valor);
-
-    printf("Bit 7 está ligado? [%d]", testBit(valor, 7));
-    printf("Bit 2 está ligado? [%d]", testBit(valor, 2));
+    unsigned int valor = 0b10001011; // 139
     
-    printf("\nDesligando bit 6");
-    valor = clearBit(valor, 6);
+    
+    printf("Valor: %d\n", valor);
+    printf("Limpando bits...\n");
+    printf("Valor att.: %d\n", clear(valor));
 
-    printf("\n%d", valor);
-    printf("\n");
+    printf("\nValor: %d\n", valor);
+    printf("Ligando bit 5\n");
+    printf("Valor att.: %d\n", setbit(valor, 5));
+
+    printf("\nValor: %d\n", valor);
+    printf("Desligando bit 1\n");
+    printf("Valor att.: %d\n", clearbit(valor, 1));
+    
+    printf("\nValor: %d\n", valor);
+    printf("Invertendo bit 5\n");
+    printf("Valor att.: %d\n", invertbit(valor, 5));
+    
+    printf("\nValor: %d\n", valor);
+    printf("Bit 6 ligado? (1 = true | 0 = false)\n");
+    printf("-------------- [%d] -----------------\n", testbit(valor, 6));
+    
+
+    return 0;
 }
 
-void exibeInt(unsigned int v)
+unsigned int clear(unsigned int val)
 {
-    for (int i = 31; i <= 0; i--)
-    {
-        
-    }
-    
+    unsigned int maskr = 0;
+    unsigned int inverte = val & maskr;
+    return val&inverte;
 }
 
-int testBit(unsigned int v, int bit)
+unsigned int setbit(unsigned int val, int bit)
+{
+    unsigned int maskr = 1 << bit;
+    return (val | maskr);
+}
+
+unsigned int clearbit(unsigned int val, int bit)
+{
+    unsigned int maskr = ~(1 << bit);
+    return (val & maskr);
+}
+
+unsigned int invertbit(unsigned int val, int bit)
+{
+    unsigned int maskr = 1 << bit;
+    return (val ^ maskr);
+}
+
+unsigned int testbit(unsigned int val, int bit)
 {
     unsigned int mascara = 1 << bit;
-
-}
-
-unsigned int clearBit(unsigned int v, int bit)
-{
-    unsigned int mascara = ~(1 << bit);
     
-    v = v & mascara;
-    return v;
+    if ((val & mascara) != 0)
+        return 1;
+    return 0;
+    
 }

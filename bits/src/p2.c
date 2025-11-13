@@ -37,7 +37,7 @@ float fixoParaFlutuante(pFixo valor)
     {
         if((1 << bit) & valor)
         {
-
+            res += 
         }
     }
     
