@@ -138,9 +138,9 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 30, 60, 10, "images/carv2.png", NULL, 0.1, 1);
-    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 30, 60, 10, "images/carv2.png", NULL, 0.1, 1);
-    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 60, 1, "images/hockeydisk.png", NULL, 0.1, 0.9);
+    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 40, 80, 10, "images/carv2.png", NULL, 0.1, 1);
+    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 40, 80, 10, "images/carv2.png", NULL, 0.1, 1);
+    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 40, 1, "images/hockeydisk.png", NULL, 0.1, 0.9);
     
 
     cpBodySetType(goal1, CP_BODY_TYPE_STATIC);

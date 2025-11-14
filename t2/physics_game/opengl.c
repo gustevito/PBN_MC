@@ -101,7 +101,7 @@ GLuint loadImage(char *img)
 
 void loadImages()
 {
-    backgroundTex = loadImage("images/ice.png");
+    backgroundTex = loadImage("images/icefield.png");
     printf("Background tex id: %d\n", backgroundTex);
 }
 
@@ -210,30 +210,55 @@ void drawBody(cpVect pos, cpFloat angle, UserData *ud)
     glPopMatrix();
 }
 
+// // Desenha uma imagem retangular ocupando toda a janela
 void drawBackground()
 {
     glBindTexture(GL_TEXTURE_2D, backgroundTex);
     glEnable(GL_TEXTURE_2D);
     glColor3f(1, 1, 1);
+    glBegin(GL_QUADS);
 
-    float bgTileSize = 512.0f; // tamanho de um tile do fundo
-    float startX = floor(cameraX / bgTileSize) * bgTileSize;
-    float startY = floor(cameraY / bgTileSize) * bgTileSize;
+    glTexCoord2f(0, 0);
+    glVertex2f(0, 0);
 
-    // desenha blocos de fundo que cobrem toda a tela
-    for (float x = startX; x < cameraX + LARGURA_JAN; x += bgTileSize) {
-        for (float y = startY; y < cameraY + ALTURA_JAN; y += bgTileSize) {
-            glBegin(GL_QUADS);
-                glTexCoord2f(0, 0); glVertex2f(x, y);
-                glTexCoord2f(1, 0); glVertex2f(x + bgTileSize, y);
-                glTexCoord2f(1, 1); glVertex2f(x + bgTileSize, y + bgTileSize);
-                glTexCoord2f(0, 1); glVertex2f(x, y + bgTileSize);
-            glEnd();
-        }
-    }
+    glTexCoord2f(1, 0);
+    glVertex2f(LARGURA_JAN - 1, 0);
 
+    glTexCoord2f(1, 1);
+    glVertex2f(LARGURA_JAN - 1, ALTURA_JAN - 1);
+
+    glTexCoord2f(0, 1);
+    glVertex2f(0, ALTURA_JAN - 1);
+
+    glEnd();
     glDisable(GL_TEXTURE_2D);
 }
+
+
+// void drawBackground()
+// {
+//     glBindTexture(GL_TEXTURE_2D, backgroundTex);
+//     glEnable(GL_TEXTURE_2D);
+//     glColor3f(1, 1, 1);
+
+//     float bgTileSize = 512.0f; // tamanho de um tile do fundo
+//     float startX = floor(cameraX / bgTileSize) * bgTileSize;
+//     float startY = floor(cameraY / bgTileSize) * bgTileSize;
+
+//     // desenha blocos de fundo que cobrem toda a tela
+//     for (float x = startX; x < cameraX + LARGURA_JAN; x += bgTileSize) {
+//         for (float y = startY; y < cameraY + ALTURA_JAN; y += bgTileSize) {
+//             glBegin(GL_QUADS);
+//                 glTexCoord2f(0, 0); glVertex2f(x, y);
+//                 glTexCoord2f(1, 0); glVertex2f(x + bgTileSize, y);
+//                 glTexCoord2f(1, 1); glVertex2f(x + bgTileSize, y + bgTileSize);
+//                 glTexCoord2f(0, 1); glVertex2f(x, y + bgTileSize);
+//             glEnd();
+//         }
+//     }
+
+//     glDisable(GL_TEXTURE_2D);
+// }
 
 
 // Escreve o score na tela
@@ -452,29 +477,6 @@ void glutBitmapString(void *font, char *string)
 
 
 
-// // Desenha uma imagem retangular ocupando toda a janela
-// void drawBackground()
-// {
-//     glBindTexture(GL_TEXTURE_2D, backgroundTex);
-//     glEnable(GL_TEXTURE_2D);
-//     glColor3f(1, 1, 1);
-//     glBegin(GL_QUADS);
-
-//     glTexCoord2f(0, 0);
-//     glVertex2f(0, 0);
-
-//     glTexCoord2f(1, 0);
-//     glVertex2f(LARGURA_JAN - 1, 0);
-
-//     glTexCoord2f(1, 1);
-//     glVertex2f(LARGURA_JAN - 1, ALTURA_JAN - 1);
-
-//     glTexCoord2f(0, 1);
-//     glVertex2f(0, ALTURA_JAN - 1);
-
-//     glEnd();
-//     glDisable(GL_TEXTURE_2D);
-// }
 
 
 // // processa movimento continuo (primeiro fix)
