@@ -10,11 +10,11 @@
 void movePlayer(cpBody *body, void *data);
 void moveTarget(cpBody *body, void *data);
 
-// Prototipos
 void initCM();
 void freeCM();
 void restartCM();
 
+void onGoalScored();
 void loadMenuComponents();
 
 cpShape *newLine(cpCollisionType objType, cpVect inicio, cpVect fim, cpFloat fric, cpFloat elast);
@@ -61,6 +61,12 @@ cpBody *disk;
 cpBody *goal1;
 cpBody *goal2;
 
+// timer (desenvolvido em conjunto com IA)
+int countdownTimer = 0;         // contador em frames (60 frames = 1 segundo)
+int timerActive = 0;            // flag se timer está ativo
+char timerMessage[50] = "";     // mensagem durante countdown
+void (*timerCallback)() = NULL; // função a executar quando timer acabar
+
 #ifdef _WIN32
 // Aparentemente não é mais necessário que seja 240
 #define TIMESTEP 60
@@ -72,35 +78,38 @@ cpFloat timeStep = 1.0 / TIMESTEP;
 
 cpBool collisionHandler(cpArbiter *arb, cpSpace *space, void *data)
 {
-    if (gameOver) return cpTrue;
-    
+    if (gameOver)
+        return cpTrue;
+
     cpShape *a, *b;
     cpArbiterGetShapes(arb, &a, &b);
-    
+
     cpShape *goalShape = NULL;
     if (cpShapeGetCollisionType(a) == GOAL)
         goalShape = a;
     else if (cpShapeGetCollisionType(b) == GOAL)
         goalShape = b;
-    
+
     cpBody *goalBody = cpShapeGetBody(goalShape);
-    
-    if (goalBody == goal1) {
+
+    if (goalBody == goal1)
+    {
         score_playerTwo++;
         printf("GOL do Player 2! Placar: P1=%d P2=%d\n", score_playerOne, score_playerTwo);
-    } else if (goalBody == goal2) {
+    }
+    else if (goalBody == goal2)
+    {
         score_playerOne++;
         printf("GOL do Player 1! Placar: P1=%d P2=%d\n", score_playerOne, score_playerTwo);
     }
-    
-    // reseta disco no centro
-    cpBodySetPosition(disk, cpv(XPOS_DISK, YPOS_DISK));
-    cpBodySetVelocity(disk, cpvzero);
-    
-    if (score_playerOne >= 5 || score_playerTwo >= 5) {
+
+    // reseta disco no centro e players nas posicoes
+    onGoalScored();
+    if (score_playerOne >= 5 || score_playerTwo >= 5)
+    {
         gameOver = 1;
     }
-    
+
     return cpTrue;
 }
 
@@ -117,17 +126,17 @@ void initCM()
     // Seta o fator de damping, isto é, de atrito do ar (10% da velocidade é perdida a cada segundo)
     cpSpaceSetDamping(space, 0.6);
 
-    cpSpaceSetGravity(space, cpv(0,0));
+    cpSpaceSetGravity(space, cpv(0, 0));
 
     // Adiciona 4 linhas estáticas para formarem as "paredes" do ambiente
-    leftWall = newLine(WALL, cpv(0, 0), cpv(0, mapHeight), 0, 1.0);
-    rightWall = newLine(WALL, cpv(mapWidth, 0), cpv(mapWidth, mapHeight), 0, 1.0);
-    bottomWall = newLine(WALL, cpv(0, 0), cpv(mapWidth, 0), 0, 1.0);
-    topWall = newLine(WALL, cpv(0, mapHeight), cpv(mapWidth, mapHeight), 0, 1.0);
+    leftWall = newLine(WALL, cpv(0, 0), cpv(0, ALTURA_JAN), 0, 1.0);
+    rightWall = newLine(WALL, cpv(LARGURA_JAN, 0), cpv(LARGURA_JAN, ALTURA_JAN), 0, 1.0);
+    bottomWall = newLine(WALL, cpv(0, 0), cpv(LARGURA_JAN, 0), 0, 1.0);
+    topWall = newLine(WALL, cpv(0, ALTURA_JAN), cpv(LARGURA_JAN, ALTURA_JAN), 0, 1.0);
 
-    goal1 = newRect(GOAL, cpv(0, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
-    goal2 = newRect(GOAL, cpv(mapWidth, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
-    
+    goal1 = newRect(GOAL, cpv(0, (ALTURA_JAN / 2)), 100, 200, 0, "images/titlemenu.png", NULL, 0, 0);
+    goal2 = newRect(GOAL, cpv(LARGURA_JAN, (ALTURA_JAN / 2)), 100, 200, 0, "images/titlemenu.png", NULL, 0, 0);
+
     // Agora criamos um corpo...
     // Os parâmetros são:
     //   - posição: cpVect (vetor: x e y)
@@ -139,18 +148,19 @@ void initCM()
     //   - coeficiente de elasticidade
 
     playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 40, 80, 10, "images/carv2.png", NULL, 0.1, 1);
+    cpBodySetAngle(playerOne, M_PI * 0.5f);
     playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 40, 80, 10, "images/carv2.png", NULL, 0.1, 1);
-    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 40, 1, "images/hockeydisk.png", NULL, 0.1, 0.9);
-    
+    cpBodySetAngle(playerTwo, -M_PI * 0.5f);
+    disk = newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 40, 1, "images/hockeydisk.png", NULL, 0.1, 0.9);
 
     cpBodySetType(goal1, CP_BODY_TYPE_STATIC);
     cpBodySetType(goal2, CP_BODY_TYPE_STATIC);
 
+
     // Tratamento de colisões: callback
-    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, DISK, GOAL); 
+    cpCollisionHandler *handler = cpSpaceAddCollisionHandler(space, DISK, GOAL);
     handler->beginFunc = collisionHandler;
 }
-
 
 // Libera memória ocupada por cada corpo, forma e ambiente
 // Acrescente mais linhas caso necessário
@@ -182,26 +192,36 @@ void restartCM()
 {
     score_playerOne = 0;
     score_playerTwo = 0;
-    
+
     cpBodySetPosition(playerOne, cpv(XPOS_PLAYER1, YPOS_PLAYER1));
+    cpBodySetAngle(playerOne, M_PI * 0.5f);
     cpBodySetPosition(playerTwo, cpv(XPOS_PLAYER2, YPOS_PLAYER2));
+    cpBodySetAngle(playerTwo, -M_PI * 0.5f);
     cpBodySetPosition(disk, cpv(XPOS_DISK, YPOS_DISK));
-    
+
     cpBodySetVelocity(playerOne, cpvzero);
     cpBodySetVelocity(playerTwo, cpvzero);
     cpBodySetVelocity(disk, cpvzero);
-    
+
     gameOver = 0;
+}
+
+
+
+
+void onGoalScored()
+{
+    printf("Reiniciando após gol!\n");
+    cpBodySetPosition(disk, cpv(XPOS_DISK, YPOS_DISK));
+    cpBodySetPosition(playerOne, cpv(XPOS_PLAYER1, YPOS_PLAYER1));
+    cpBodySetPosition(playerTwo, cpv(XPOS_PLAYER2, YPOS_PLAYER2));
+    cpBodySetVelocity(disk, cpvzero);
 }
 
 int main(int argc, char **argv)
 {
-    // Inicialização da janela gráfica
     init(argc, argv);
-
     loadMenuComponents();
-
-    // Não retorna... a partir daqui, interação via teclado e mouse apenas, na janela gráfica
     glutMainLoop();
     return 0;
 }
@@ -245,6 +265,7 @@ cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat heig
 {
     cpFloat radius = 0.01;
     cpFloat moment = cpMomentForBox(mass, width, height);
+    
 
     cpBody *newBody = cpSpaceAddBody(space, cpBodyNew(mass, moment));
 
@@ -267,12 +288,6 @@ cpBody *newRect(cpCollisionType objType, cpVect pos, cpFloat width, cpFloat heig
     printf("newRect: loaded img %s\n", img);
     return newBody;
 }
-
-
-
-
-
-
 
 // // Exemplo de função de movimentação: move o personagem em direção ao outro corpo
 // void movePlayer(cpBody *body, void *data)

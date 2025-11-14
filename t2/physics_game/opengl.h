@@ -16,7 +16,11 @@
 #include <stdlib.h>
 #include <chipmunk.h>
 
-#define LARGURA_JAN 1824
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif // M_PI
+
+#define LARGURA_JAN 1712
 #define ALTURA_JAN 962
 
 // PLAYER 1

@@ -4,14 +4,11 @@
 #include <SOIL.h>
 #include <ctype.h>
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif // M_PI
 
-// tamanho do mapa
-float cameraX = 0.0f, cameraY = 0.0f;
-float mapWidth = LARGURA_JAN;   // largura total do mapa
-float mapHeight = ALTURA_JAN;  // altura total do mapa
+// camera (nao usamos)
+// float cameraX = 0.0f, cameraY = 0.0f;
+// float mapWidth = 3000.0f; // largura total do mapa
+// float mapHeight = 4000.0f; // altura total do mapa
 
 // movement fix ##
 extern int keys[256];
@@ -26,7 +23,12 @@ void menuKeyboard(unsigned char key, int x, int y);
 
 extern int score_playerOne;
 extern int score_playerTwo;
-extern int gameOver; 
+extern int gameOver;
+
+// timer
+extern int countdownTimer;
+extern int timerActive;
+extern char timerMessage[50];
 
 GLuint backgroundTex;
 
@@ -55,21 +57,16 @@ void display();
 void keyboard(unsigned char key, int x, int y);
 void keyboardUp(unsigned char key, int x, int y); // movement fix ##
 void arrow_keys(int key, int x, int y);
-void arrow_keys_up(int key, int x, int y);  // movement fix ##
+void arrow_keys_up(int key, int x, int y); // movement fix ##
 void reshape(int w, int h);
 void init(int argc, char **argv);
 void timer(int val);
 void updateMovement(); // movement fix ##
-void updateCamera();
-
-
-
+// void updateCamera();
 
 // Funções para a Chipmunk
 void eachBodyFunc(cpBody *body, void *data);
 void drawBody(cpVect pos, cpFloat angle, UserData *ud);
-
-
 
 #ifndef __FREEGLUT_H__
 void glutBitmapString(void *font, char *string);
@@ -88,8 +85,7 @@ GLuint loadImage(char *img)
         img,
         SOIL_LOAD_AUTO,
         SOIL_CREATE_NEW_ID,
-        SOIL_FLAG_MIPMAPS | SOIL_FLAG_TEXTURE_REPEATS | SOIL_FLAG_MULTIPLY_ALPHA
-    );
+        SOIL_FLAG_MIPMAPS | SOIL_FLAG_TEXTURE_REPEATS | SOIL_FLAG_MULTIPLY_ALPHA);
 
     if (!t)
     {
@@ -122,14 +118,14 @@ void init(int argc, char **argv)
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
-    
+
     glutKeyboardFunc(keyboard);
     glutKeyboardUpFunc(keyboardUp);
     glutSpecialFunc(arrow_keys);
     glutSpecialUpFunc(arrow_keys_up);
 
     glutTimerFunc(1, timer, 0);
-    
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -151,7 +147,6 @@ void timer(int val)
     updateCarPhysics();
     // updateMovement(); // processa movimento contínuo
     cpSpaceStep(space, timeStep);
-    updateCamera();
     glutTimerFunc(1, timer, 0);
     glutPostRedisplay();
 }
@@ -187,10 +182,10 @@ void drawBody(cpVect pos, cpFloat angle, UserData *ud)
     // Habilita blending para transparência
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    
+
     glBindTexture(GL_TEXTURE_2D, ud->tex);
     glEnable(GL_TEXTURE_2D);
-    glColor4f(1, 1, 1, 1);  // Mude de glColor3f para glColor4f com alpha = 1
+    glColor4f(1, 1, 1, 1); // Mude de glColor3f para glColor4f com alpha = 1
     glBegin(GL_QUADS);
 
     glTexCoord2f(0, 0);
@@ -210,7 +205,7 @@ void drawBody(cpVect pos, cpFloat angle, UserData *ud)
     glPopMatrix();
 }
 
-// // Desenha uma imagem retangular ocupando toda a janela
+// no fim usamos a mesma função base
 void drawBackground()
 {
     glBindTexture(GL_TEXTURE_2D, backgroundTex);
@@ -233,7 +228,6 @@ void drawBackground()
     glEnd();
     glDisable(GL_TEXTURE_2D);
 }
-
 
 // void drawBackground()
 // {
@@ -260,26 +254,26 @@ void drawBackground()
 //     glDisable(GL_TEXTURE_2D);
 // }
 
-
 // Escreve o score na tela
 void drawScore()
 {
     char strscore[50];
-    
+
     // Desenha placar dos dois jogadores
+    glColor3f(0, 0, 0);
     sprintf(strscore, "Player 1: %d", score_playerOne);
-    glRasterPos2i(LARGURA_JAN/3, 30);
+    glRasterPos2i(LARGURA_JAN / 3, 30);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18, strscore);
-    
+
     sprintf(strscore, "Player 2: %d", score_playerTwo);
-    glRasterPos2i(LARGURA_JAN/1.5, 30);
+    glRasterPos2i(LARGURA_JAN / 1.5, 30);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18, strscore);
 
     if (gameOver)
     {
         char strgameover[100];
         glRasterPos2i(LARGURA_JAN / 2 - 200, ALTURA_JAN / 2);
-        
+
         // Mostra vencedor
         if (score_playerOne > score_playerTwo)
             sprintf(strgameover, "Player 1 Venceu! (%d x %d)", score_playerOne, score_playerTwo);
@@ -287,7 +281,7 @@ void drawScore()
             sprintf(strgameover, "Player 2 Venceu! (%d x %d)", score_playerOne, score_playerTwo);
         else
             sprintf(strgameover, "Empate! (%d x %d)", score_playerOne, score_playerTwo);
-            
+
         glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, strgameover);
     }
 }
@@ -297,7 +291,8 @@ void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
 
-    if (gameState == 0) {
+    if (gameState == 0)
+    {
         drawMenu();
         return;
     }
@@ -306,15 +301,14 @@ void display()
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glTranslatef(-cameraX, -cameraY, 0); // aplica transformaçao de camera
-    
+    // glTranslatef(-cameraX, -cameraY, 0); // aplica transformaçao de camera
+
     drawBackground();
     drawScore();
     cpSpaceEachBody(space, eachBodyFunc, NULL);
     // cpSpaceDebugDraw(space, &drawOptions);
     glutSwapBuffers();
 }
-
 
 // Callback de redimensionamento da janela
 void reshape(int w, int h)
@@ -338,7 +332,7 @@ void reshape(int w, int h)
         // Janela mais alta que o desejado: ajusta altura
         float novaAlt = LARGURA_JAN / aspect;
         float dif = (novaAlt - ALTURA_JAN) / 2;
-        glOrtho(0, LARGURA_JAN - 1, ALTURA_JAN-1+dif, -dif, -1, 1);
+        glOrtho(0, LARGURA_JAN - 1, ALTURA_JAN - 1 + dif, -dif, -1, 1);
     }
     // Volta à matriz de transformação e visualização
     glMatrixMode(GL_MODELVIEW);
@@ -348,19 +342,20 @@ void reshape(int w, int h)
 // Callback de teclado - MELHORADA
 void keyboard(unsigned char key, int x, int y)
 {
-    
+
     keys[key] = 1;
     keys[toupper(key)] = 1;
     keys[tolower(key)] = 1;
-    
-    if (gameState == 0) {
+
+    if (gameState == 0)
+    {
         menuKeyboard(key, x, y);
         return;
     }
-    
+
     switch (key)
     {
-    case 27:  // ESC
+    case 27: // ESC
         freeCM();
         exit(1);
         break;
@@ -390,29 +385,27 @@ void arrow_keys_up(int key, int x, int y)
 void keyboardUp(unsigned char key, int x, int y)
 {
     keys[key] = 0;
-    keys[toupper(key)] = 0;  // Limpa ambas versões da tecla
+    keys[toupper(key)] = 0; // Limpa ambas versões da tecla
     keys[tolower(key)] = 0;
 }
 
+// void updateCamera()
+// {
+//     if (!playerOne) return;
 
-void updateCamera()
-{
-    if (!playerOne) return;
+//     // Posição do jogador
+//     cpVect playerPos = cpBodyGetPosition(playerOne);
 
-    // Posição do jogador
-    cpVect playerPos = cpBodyGetPosition(playerOne);
+//     // Centraliza a câmera no jogador
+//     cameraX = playerPos.x - (LARGURA_JAN / 2);
+//     cameraY = playerPos.y - (ALTURA_JAN / 2);
 
-    // Centraliza a câmera no jogador
-    cameraX = playerPos.x - (LARGURA_JAN / 2);
-    cameraY = playerPos.y - (ALTURA_JAN / 2);
-
-    // Impede que a câmera saia fora dos limites do mapa
-    if (cameraX < 0) cameraX = 0;
-    if (cameraY < 0) cameraY = 0;
-    if (cameraX > mapWidth - LARGURA_JAN) cameraX = mapWidth - LARGURA_JAN;
-    if (cameraY > mapHeight - ALTURA_JAN) cameraY = mapHeight - ALTURA_JAN;
-}
-
+//     // Impede que a câmera saia fora dos limites do mapa
+//     if (cameraX < 0) cameraX = 0;
+//     if (cameraY < 0) cameraY = 0;
+//     if (cameraX > mapWidth - LARGURA_JAN) cameraX = mapWidth - LARGURA_JAN;
+//     if (cameraY > mapHeight - ALTURA_JAN) cameraY = mapHeight - ALTURA_JAN;
+// }
 
 //
 // Funções para o debug draw da Chipmunk
@@ -433,7 +426,7 @@ void DrawCircle(cpVect pos, cpFloat angle, cpFloat radius, cpSpaceDebugColor out
 
 void DrawSegment(cpVect a, cpVect b, cpSpaceDebugColor color, cpDataPointer data)
 {
-    glColor3f(1,0,0);
+    glColor3f(1, 0, 0);
     glBegin(GL_LINES);
     glVertex2f(a.x, a.y);
     glVertex2f(b.x, b.y);
@@ -452,7 +445,7 @@ void DrawFatSegment(cpVect a, cpVect b, cpFloat r, cpSpaceDebugColor outline, cp
 void DrawPolygon(int count, const cpVect *verts, cpFloat r, cpSpaceDebugColor outline, cpSpaceDebugColor fill, cpDataPointer data)
 {
     glBegin(GL_LINE_LOOP);
-    for(int i=0; i<count; i++)
+    for (int i = 0; i < count; i++)
         glVertex2f(verts[i].x, verts[i].y);
     glEnd();
 }
@@ -475,29 +468,25 @@ void glutBitmapString(void *font, char *string)
 
 #endif
 
-
-
-
-
 // // processa movimento continuo (primeiro fix)
 // void updateMovement()
 // {
 //     if (gameOver || !playerOne) return;
-    
+
 //     int dx = 0, dy = 0;
-    
+
 //     // Verifica teclas normais
 //     if (keys['w'] || keys['W']) dy -= PLAYER_SPEED;
 //     if (keys['s'] || keys['S']) dy += PLAYER_SPEED;
 //     if (keys['a'] || keys['A']) dx -= PLAYER_SPEED;
 //     if (keys['d'] || keys['D']) dx += PLAYER_SPEED;
-    
+
 //     // Verifica teclas especiais (setas)
 //     if (special_keys[GLUT_KEY_UP]) dy -= PLAYER_SPEED;
 //     if (special_keys[GLUT_KEY_DOWN]) dy += PLAYER_SPEED;
 //     if (special_keys[GLUT_KEY_LEFT]) dx -= PLAYER_SPEED;
 //     if (special_keys[GLUT_KEY_RIGHT]) dx += PLAYER_SPEED;
-    
+
 //     if (dx != 0 || dy != 0)
 //     {
 //         cpVect pos = cpBodyGetPosition(playerOne);
