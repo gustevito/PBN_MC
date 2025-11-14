@@ -25,6 +25,7 @@ void drawMenu();
 void menuKeyboard(unsigned char key, int x, int y);
 
 extern int score_playerOne;
+extern int score_playerTwo;
 extern int gameOver; 
 
 GLuint backgroundTex;
@@ -122,14 +123,10 @@ void init(int argc, char **argv)
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
     
-    // IMPORTANTE: Registrar TODOS os callbacks de uma vez
-    glutKeyboardFunc(keyboard);         // Sempre usa keyboard()
-    glutKeyboardUpFunc(keyboardUp);     // Para quando solta a tecla
-    glutSpecialFunc(arrow_keys);        // Teclas especiais (setas)
-    glutSpecialUpFunc(arrow_keys_up);   // Quando solta teclas especiais
-    
-    // NÃO sobrescrever com menuKeyboard aqui!
-    // O tratamento do menu será feito DENTRO de keyboard()
+    glutKeyboardFunc(keyboard);
+    glutKeyboardUpFunc(keyboardUp);
+    glutSpecialFunc(arrow_keys);
+    glutSpecialUpFunc(arrow_keys_up);
 
     glutTimerFunc(1, timer, 0);
     
@@ -242,18 +239,30 @@ void drawBackground()
 // Escreve o score na tela
 void drawScore()
 {
-    char strscore[30];
-    sprintf(strscore, "Score: %d", score_playerOne);
-    // Sistema de coordenadas: Y cresce para BAIXO
-    glRasterPos2i(20, 30);
+    char strscore[50];
+    
+    // Desenha placar dos dois jogadores
+    sprintf(strscore, "Player 1: %d", score_playerOne);
+    glRasterPos2i(LARGURA_JAN/3, 30);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, strscore);
+    
+    sprintf(strscore, "Player 2: %d", score_playerTwo);
+    glRasterPos2i(LARGURA_JAN/1.5, 30);
     glutBitmapString(GLUT_BITMAP_HELVETICA_18, strscore);
 
-    // Se o jogo terminou, exibe a mensagem de game over
     if (gameOver)
     {
         char strgameover[100];
         glRasterPos2i(LARGURA_JAN / 2 - 200, ALTURA_JAN / 2);
-        sprintf(strgameover, "Game Over (score: %d)", score_playerOne);
+        
+        // Mostra vencedor
+        if (score_playerOne > score_playerTwo)
+            sprintf(strgameover, "Player 1 Venceu! (%d x %d)", score_playerOne, score_playerTwo);
+        else if (score_playerTwo > score_playerOne)
+            sprintf(strgameover, "Player 2 Venceu! (%d x %d)", score_playerOne, score_playerTwo);
+        else
+            sprintf(strgameover, "Empate! (%d x %d)", score_playerOne, score_playerTwo);
+            
         glutBitmapString(GLUT_BITMAP_TIMES_ROMAN_24, strgameover);
     }
 }

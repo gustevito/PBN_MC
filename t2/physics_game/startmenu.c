@@ -112,9 +112,9 @@ void drawMenu() {
 void menuKeyboard(unsigned char key, int x, int y) {
     if (key == 27) { // ESC
         exit(0);
-    } else if (key == ' ') { // Barra de espaço
-        gameState = 1;   // muda para modo jogo
-        restartCM();     // reinicia a simulação
+    } else if (key == ' ') {
+        gameState = 1;
+        restartCM();
         glutPostRedisplay();
     }
 }

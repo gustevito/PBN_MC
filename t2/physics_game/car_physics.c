@@ -1,6 +1,3 @@
-// car_physics.c
-// Física de carro com aceleração, rotação, frenagem (Z) e boost (X)
-
 #include <math.h>
 #include <chipmunk.h>
 #include "opengl.h"
@@ -12,9 +9,12 @@ extern cpBody *playerOne;
 // parâmetros básicos
 static const float ENGINE_FORCE = 2400.0f;
 static const float MAX_SPEED = 800.0f;
-static const float TURN_SPEED = 0.08f;
+static const float TURN_SPEED = 0.03f;
 static const float BRAKE_FORCE = 3600.0f;
 static const float BOOST_FORCE = 4800.0f;
+
+static const float DRIFT_DAMPING = 0.92f;       // reduz derrapagem lateral
+static const float SPEED_TURN_REDUCTION = 0.4f; // reduz curva em alta velocidade
 static float steering = 0.0f;
 
 // função auxiliar segura para normalização
@@ -46,6 +46,9 @@ void updateCarPhysics()
     cpVect vel = cpBodyGetVelocity(playerOne);
     float speed = cpvlength(vel);
 
+    cpVect right = cpv(cos(angle), sin(angle)); // Vetor lateral do carro
+    float lateralVel = cpvdot(vel, right);      // Velocidade lateral
+
     // Força do motor base
     float motorForce = 0.0f;
     if (forwardKey)
@@ -53,7 +56,7 @@ void updateCarPhysics()
         motorForce = ENGINE_FORCE;
         if (boostKey)
         {
-            motorForce = BOOST_FORCE; // Boost só funciona acelerando
+            motorForce = BOOST_FORCE;
         }
     }
     else if (backwardKey)
@@ -96,12 +99,16 @@ void updateCarPhysics()
         targetSteering = 1.0f;
     steering += (targetSteering - steering) * STEERING_ACCEL;
 
+    if (fabs(lateralVel) > 5.0f)
+    {
+        cpVect lateralDamping = cpvmult(right, -lateralVel * DRIFT_DAMPING * 20.0f);
+        cpBodyApplyForceAtWorldPoint(playerOne, lateralDamping, pos);
+    }
 
     // suavizar curva conforme a velocidade
     float speedFactor = fminf(speed / MAX_SPEED, 2.0f);
-    cpBodySetAngularVelocity(playerOne, steering * speedFactor * 20.0f);
-    
-    // cpBodySetAngle(playerOne, angle + steering * (speedFactor * 0.3f));
+    float speedReduction = 1.0f / (1.0f + speed * SPEED_TURN_REDUCTION / MAX_SPEED);
+    cpBodySetAngularVelocity(playerOne, steering * speedFactor * speedReduction * 20.0f);
 
     // limitar velocidade máxima
     if (speed > MAX_SPEED * 1.8f)

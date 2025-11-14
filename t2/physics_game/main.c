@@ -72,12 +72,35 @@ cpFloat timeStep = 1.0 / TIMESTEP;
 
 cpBool collisionHandler(cpArbiter *arb, cpSpace *space, void *data)
 {
-    // Se o jogo já acabou, não faz nada
-    if (gameOver)
-        return cpTrue;
-
-    score_playerOne++;
-    printf("score_playerOne: %d\n", score_playerOne);
+    if (gameOver) return cpTrue;
+    
+    cpShape *a, *b;
+    cpArbiterGetShapes(arb, &a, &b);
+    
+    cpShape *goalShape = NULL;
+    if (cpShapeGetCollisionType(a) == GOAL)
+        goalShape = a;
+    else if (cpShapeGetCollisionType(b) == GOAL)
+        goalShape = b;
+    
+    cpBody *goalBody = cpShapeGetBody(goalShape);
+    
+    if (goalBody == goal1) {
+        score_playerTwo++;
+        printf("GOL do Player 2! Placar: P1=%d P2=%d\n", score_playerOne, score_playerTwo);
+    } else if (goalBody == goal2) {
+        score_playerOne++;
+        printf("GOL do Player 1! Placar: P1=%d P2=%d\n", score_playerOne, score_playerTwo);
+    }
+    
+    // reseta disco no centro
+    cpBodySetPosition(disk, cpv(XPOS_DISK, YPOS_DISK));
+    cpBodySetVelocity(disk, cpvzero);
+    
+    if (score_playerOne >= 5 || score_playerTwo >= 5) {
+        gameOver = 1;
+    }
+    
     return cpTrue;
 }
 
@@ -102,8 +125,8 @@ void initCM()
     bottomWall = newLine(WALL, cpv(0, 0), cpv(mapWidth, 0), 0, 1.0);
     topWall = newLine(WALL, cpv(0, mapHeight), cpv(mapWidth, mapHeight), 0, 1.0);
 
-    goal1 = newRect(GOAL, cpv(mapWidth, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
-    goal2 = newRect(GOAL, cpv(0, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
+    goal1 = newRect(GOAL, cpv(0, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
+    goal2 = newRect(GOAL, cpv(mapWidth, (mapHeight/2)), 20, 200, 10, "images/titlemenu.png", NULL, 0, 0);
     
     // Agora criamos um corpo...
     // Os parâmetros são:
@@ -115,9 +138,9 @@ void initCM()
     //   - coeficiente de fricção
     //   - coeficiente de elasticidade
 
-    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 30, 60, 10, "images/carv2.png", NULL, 0.5, 0.2);
-    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 30, 60, 10, "images/carv2.png", NULL, 0.5, 0.2);
-    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 100, 1, "images/hockeydisk.png", NULL, 0.9, 0.1);
+    playerOne = newRect(PLAYERONE, cpv(XPOS_PLAYER1, YPOS_PLAYER1), 30, 60, 10, "images/carv2.png", NULL, 0.1, 1);
+    playerTwo = newRect(PLAYERTWO, cpv(XPOS_PLAYER2, YPOS_PLAYER2), 30, 60, 10, "images/carv2.png", NULL, 0.1, 1);
+    disk =  newCircle(DISK, cpv(XPOS_DISK, YPOS_DISK), 60, 1, "images/hockeydisk.png", NULL, 0.1, 0.9);
     
 
     cpBodySetType(goal1, CP_BODY_TYPE_STATIC);
@@ -157,9 +180,17 @@ void freeCM()
 // Função chamada para reiniciar a simulação
 void restartCM()
 {
-    // Escreva o código para reposicionar os personagens, ressetar o score_playerOne, etc.
-
-    // Não esqueça de ressetar a variável gameOver!
+    score_playerOne = 0;
+    score_playerTwo = 0;
+    
+    cpBodySetPosition(playerOne, cpv(XPOS_PLAYER1, YPOS_PLAYER1));
+    cpBodySetPosition(playerTwo, cpv(XPOS_PLAYER2, YPOS_PLAYER2));
+    cpBodySetPosition(disk, cpv(XPOS_DISK, YPOS_DISK));
+    
+    cpBodySetVelocity(playerOne, cpvzero);
+    cpBodySetVelocity(playerTwo, cpvzero);
+    cpBodySetVelocity(disk, cpvzero);
+    
     gameOver = 0;
 }
 
