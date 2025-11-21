@@ -61,7 +61,6 @@ void arrow_keys_up(int key, int x, int y); // movement fix ##
 void reshape(int w, int h);
 void init(int argc, char **argv);
 void timer(int val);
-void updateMovement(); // movement fix ##
 // void updateCamera();
 
 // Funções para a Chipmunk
